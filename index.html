@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Roadmap</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="AI Roadmap">
+      <div>
+        <h1>AI Roadmap</h1>
+        <p>普通人的生成式 AI 使用地图</p>
+      </div>
+      <a class="source-link" href="./AI%20Roadmap%200.0.2.md" aria-label="查看 Markdown 原文">↗</a>
+    </header>
+
+    <main>
+      <section class="desktop-roadmap" aria-label="AI Roadmap 平铺路线图">
+        <div class="map-shell" id="mapShell">
+          <div class="map-canvas" id="mapCanvas">
+            <svg class="connector-layer" id="connectorLayer" aria-hidden="true">
+              <g id="topicEdgeLayer"></g>
+              <g id="resourceEdgeLayer"></g>
+            </svg>
+            <div class="node-layer" id="nodeLayer"></div>
+            <div class="annotation-layer" id="annotationLayer"></div>
+          </div>
+        </div>
+        <div class="zoom-controls" aria-label="缩放控制">
+          <button type="button" data-zoom="in" title="放大">+</button>
+          <button type="button" data-zoom="out" title="缩小">-</button>
+          <button type="button" data-zoom="fit" title="适合窗口">fit</button>
+        </div>
+      </section>
+
+      <section class="mobile-roadmap" id="mobileRoadmap" aria-label="AI Roadmap 移动端路线图"></section>
+    </main>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
