@@ -1,0 +1,44 @@
+---
+import StagePanel from "./StagePanel.astro";
+
+type Stage = {
+  side: string;
+  color: string;
+  title: string;
+  note?: boolean;
+};
+
+const { stage, index, handnote } = Astro.props as {
+  stage: Stage;
+  index: number;
+  handnote: { src: string; alt: string };
+};
+const isLeft = stage.side === "left";
+---
+
+<article class={`roadmap-stage ${isLeft ? "is-left" : "is-right"}`} style={`--stage-index:${index};`}>
+  <div class="stage-side stage-panel">
+    {isLeft && <StagePanel stage={stage} />}
+  </div>
+
+  <div class="stage-spine">
+    <div class={`stage-node tone-${stage.color}`}>
+      {stage.title}
+    </div>
+    {stage.note && (
+      <img
+        class="hand-note"
+        src={handnote.src}
+        alt={handnote.alt}
+        width="376"
+        height="219"
+        loading="lazy"
+        decoding="async"
+      />
+    )}
+  </div>
+
+  <div class="stage-side stage-panel">
+    {!isLeft && <StagePanel stage={stage} />}
+  </div>
+</article>

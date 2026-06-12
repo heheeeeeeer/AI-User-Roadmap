@@ -1,0 +1,27 @@
+---
+import RoadmapStage from "./RoadmapStage.astro";
+
+const { roadmap } = Astro.props as {
+  roadmap: {
+    title: string;
+    subtitle: string;
+    handnote: { src: string; alt: string };
+    stages: unknown[];
+  };
+};
+---
+
+<main class="page-shell">
+  <section class="roadmap-board" aria-label={roadmap.subtitle}>
+    <div class="roadmap-title">
+      <h1>{roadmap.title}</h1>
+      <p>{roadmap.subtitle}</p>
+    </div>
+
+    <div class="roadmap-flow">
+      {roadmap.stages.map((stage, index: number) => (
+        <RoadmapStage stage={stage} index={index} handnote={roadmap.handnote} />
+      ))}
+    </div>
+  </section>
+</main>

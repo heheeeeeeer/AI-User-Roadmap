@@ -1,6 +1,9 @@
 .DS_Store
 *.swp
 *.swo
+node_modules/
+dist/
+.astro/
 
 AI Roadmap 0.0.2.md
 AI Roadmap 第一版技术文档.md

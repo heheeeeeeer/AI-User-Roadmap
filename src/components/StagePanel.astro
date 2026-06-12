@@ -1,0 +1,41 @@
+---
+import ResourceList from "./ResourceList.astro";
+
+type Resource = {
+  label: string;
+  url: string;
+};
+
+type Group = {
+  title: string;
+  items?: string[];
+  resources?: Resource[];
+};
+
+type Stage = {
+  summary: string;
+  groups?: Group[];
+};
+
+const { stage } = Astro.props as { stage: Stage };
+---
+
+<p class="stage-summary">{stage.summary}</p>
+<div class="stage-groups">
+  {stage.groups?.map((group: Group) => (
+    <section class="group-card">
+      <h2>{group.title}</h2>
+      {group.items && (
+        <div class="chip-grid">
+              {group.items.map((item: string) => <span>{item}</span>)}
+        </div>
+      )}
+      {group.resources && (
+        <details class="resource-details">
+          <summary>{group.resources.length} 个资源</summary>
+          <ResourceList resources={group.resources} />
+        </details>
+      )}
+    </section>
+  ))}
+</div>

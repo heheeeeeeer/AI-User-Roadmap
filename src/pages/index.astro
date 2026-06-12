@@ -1,0 +1,10 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Roadmap from "../components/Roadmap.astro";
+import { roadmap } from "../data/roadmap.js";
+import "../styles/global.css";
+---
+
+<BaseLayout title={roadmap.title} description={roadmap.subtitle}>
+  <Roadmap roadmap={roadmap} />
+</BaseLayout>
