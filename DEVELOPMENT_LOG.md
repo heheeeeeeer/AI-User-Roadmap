@@ -2,6 +2,37 @@
 
 每次修改本项目后，都需要在这里追加记录。下一次修改前必须先阅读本文件，并确认上一条记录里的回归检查点没有复现。
 
+## 2026-06-16
+
+### 改动摘要
+
+- 新增 `IntroCard` 组件并优化阶段面板样式与排版。
+- 扩充及更新路线图数据 (`src/data/roadmap.js`)。
+- 优化了资源列表展示样式和动画 (`ResourceList`, `RoadmapStage`, `global.css`)。
+- 为 Cloudflare Pages 部署做相关提交准备。
+
+### 影响文件
+
+- `.gitignore`
+- `src/components/IntroCard.astro`
+- `src/components/ResourceList.astro`
+- `src/components/Roadmap.astro`
+- `src/components/RoadmapStage.astro`
+- `src/components/StagePanel.astro`
+- `src/data/roadmap.js`
+- `src/layouts/BaseLayout.astro`
+- `src/pages/index.astro`
+- `src/styles/global.css`
+
+### 已做验证
+
+- 代码已提交，等待 Cloudflare Pages 构建流程进行测试。
+
+### 下一次改动前需要防止复现
+
+- 保证部署在 Cloudflare Pages 后的资源路径和静态文件能够正确访问。
+- 维持竖向主线布局和现有的 CSS 样式动画正常。
+
 ## 2026-06-12
 
 ### 改动摘要

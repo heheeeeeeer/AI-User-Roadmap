@@ -4,38 +4,178 @@ import ResourceList from "./ResourceList.astro";
 type Resource = {
   label: string;
   url: string;
+  note?: string;
 };
 
 type Group = {
   title: string;
+  description?: string | string[];
   items?: string[];
   resources?: Resource[];
 };
 
-type Stage = {
-  summary: string;
-  groups?: Group[];
+type Subtopic = {
+  id: string;
+  title: string;
+  color?: string;
 };
 
-const { stage } = Astro.props as { stage: Stage };
+type Stage = {
+  id?: string;
+  summary?: string;
+  groups?: Group[];
+  subtopics?: Subtopic[];
+};
+
+const { stage, inlineResources = false } = Astro.props as {
+  stage: Stage;
+  inlineResources?: boolean;
+};
 ---
 
-<p class="stage-summary">{stage.summary}</p>
 <div class="stage-groups">
-  {stage.groups?.map((group: Group) => (
+  {stage.subtopics && (
+    <section class="group-card capability-card">
+      <h2>能力模块</h2>
+      <div class="capability-grid">
+        {stage.subtopics.map((topic) => (
+          <button
+            class={`capability-button tone-${topic.color || "green"}`}
+            type="button"
+            aria-expanded="false"
+            aria-controls={`intro-panel-${topic.id}`}
+            data-intro-trigger
+          >
+            {topic.title}
+          </button>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {stage.groups?.map((group: Group, index: number) => {
+    const resourcePanelId = `${stage.id || "stage"}-${index}-resources`;
+
+    return (
     <section class="group-card">
       <h2>{group.title}</h2>
+      {group.description && (
+        <div class="group-description">
+          {(Array.isArray(group.description) ? group.description : [group.description]).map((paragraph) => (
+            <p>{paragraph}</p>
+          ))}
+        </div>
+      )}
       {group.items && (
         <div class="chip-grid">
               {group.items.map((item: string) => <span>{item}</span>)}
         </div>
       )}
-      {group.resources && (
-        <details class="resource-details">
-          <summary>{group.resources.length} 个资源</summary>
+      {group.resources && inlineResources && (
+        <div class="resource-inline" aria-label={`${group.title}，${group.resources.length} 个资源`}>
           <ResourceList resources={group.resources} />
+        </div>
+      )}
+      {group.resources && !inlineResources && (
+        <details class="resource-details" id={resourcePanelId}>
+          <summary>
+            {group.resources.length} 个资源
+          </summary>
+          <div class="resource-reveal">
+            <ResourceList resources={group.resources} />
+          </div>
         </details>
       )}
     </section>
-  ))}
+    );
+  })}
 </div>
+
+<script>
+  const setupResourceDetails = () => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const animationOptions: KeyframeAnimationOptions = {
+      duration: 300,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      fill: "forwards"
+    };
+
+    const finishAnimation = (details: HTMLDetailsElement, reveal: HTMLElement) => {
+      details.classList.remove("is-animating", "is-closing");
+      reveal.style.height = "";
+      reveal.style.opacity = "";
+      reveal.style.transform = "";
+    };
+
+    const playRevealAnimation = (
+      reveal: HTMLElement,
+      keyframes: Keyframe[],
+      onFinish: () => void
+    ) => {
+      const animation = reveal.animate(keyframes, animationOptions);
+      window.setTimeout(() => {
+        onFinish();
+        animation.cancel();
+      }, Number(animationOptions.duration));
+    };
+
+    document.querySelectorAll(".resource-details").forEach((detailsElement) => {
+      const details = detailsElement as HTMLDetailsElement;
+      const summary = details.querySelector("summary");
+      const reveal = details.querySelector(".resource-reveal") as HTMLElement | null;
+
+      if (!summary || !reveal || details.dataset.enhanced === "true") {
+        return;
+      }
+
+      details.dataset.enhanced = "true";
+
+      summary.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        if (reduceMotion.matches) {
+          details.open = !details.open;
+          return;
+        }
+
+        if (details.classList.contains("is-animating")) {
+          return;
+        }
+
+        details.classList.add("is-animating");
+
+        if (!details.open) {
+          details.open = true;
+          playRevealAnimation(
+            reveal,
+            [
+              { height: "0px", opacity: 0, transform: "translateY(-4px)" },
+              { height: `${reveal.scrollHeight}px`, opacity: 1, transform: "translateY(0)" }
+            ],
+            () => finishAnimation(details, reveal)
+          );
+          return;
+        }
+
+        details.classList.add("is-closing");
+        playRevealAnimation(
+          reveal,
+          [
+            { height: `${reveal.scrollHeight}px`, opacity: 1, transform: "translateY(0)" },
+            { height: "0px", opacity: 0, transform: "translateY(-4px)" }
+          ],
+          () => {
+            details.open = false;
+            finishAnimation(details, reveal);
+          }
+        );
+      });
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupResourceDetails, { once: true });
+  } else {
+    setupResourceDetails();
+  }
+</script>

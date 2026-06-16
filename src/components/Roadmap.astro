@@ -1,27 +1,67 @@
 ---
 import RoadmapStage from "./RoadmapStage.astro";
+import IntroCard from "./IntroCard.astro";
+
+type IntroSection = {
+  title: string;
+  paragraphs: string[];
+};
+
+type Stage = {
+  id?: string;
+  title: string;
+  summary?: string;
+  intro?: IntroSection[];
+  drawer?: boolean;
+  groups?: any[];
+  subtopics?: Stage[];
+};
 
 const { roadmap } = Astro.props as {
   roadmap: {
     title: string;
-    subtitle: string;
-    handnote: { src: string; alt: string };
-    stages: unknown[];
+    stages: Stage[];
   };
 };
+
+const drawerStages = roadmap.stages.flatMap((stage) => [
+  ...(stage.intro?.length || stage.drawer ? [stage] : []),
+  ...(stage.subtopics || [])
+]);
 ---
 
 <main class="page-shell">
-  <section class="roadmap-board" aria-label={roadmap.subtitle}>
+  <section class="roadmap-board" aria-label={roadmap.title}>
     <div class="roadmap-title">
       <h1>{roadmap.title}</h1>
-      <p>{roadmap.subtitle}</p>
     </div>
 
     <div class="roadmap-flow">
       {roadmap.stages.map((stage, index: number) => (
-        <RoadmapStage stage={stage} index={index} handnote={roadmap.handnote} />
+        <RoadmapStage stage={stage} index={index} />
       ))}
     </div>
   </section>
+
+  {drawerStages.length > 0 && (
+    <>
+      <button
+        class="intro-scrim"
+        type="button"
+        aria-label="关闭详情侧边栏"
+        aria-hidden="true"
+        tabindex="-1"
+        data-intro-close-overlay
+      ></button>
+      {drawerStages.map((stage, index) => (
+        <IntroCard
+          id={`intro-panel-${stage.id || index}`}
+          title={stage.intro?.length ? undefined : stage.title}
+          summary={stage.intro?.length ? undefined : stage.summary}
+          sections={stage.intro}
+          groups={stage.intro?.length ? undefined : stage.groups}
+        />
+      ))}
+    </>
+  )}
 </main>
