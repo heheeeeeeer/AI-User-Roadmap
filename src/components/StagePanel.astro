@@ -27,18 +27,17 @@ type Stage = {
   subtopics?: Subtopic[];
 };
 
-const { stage, inlineResources = false } = Astro.props as {
+const { stage } = Astro.props as {
   stage: Stage;
-  inlineResources?: boolean;
 };
 ---
 
 <div class="stage-groups">
-  {stage.subtopics && (
+  {Boolean(stage.subtopics?.length) && (
     <section class="group-card capability-card">
       <h2>能力模块</h2>
       <div class="capability-grid">
-        {stage.subtopics.map((topic) => (
+        {stage.subtopics?.map((topic) => (
           <button
             class={`capability-button tone-${topic.color || "green"}`}
             type="button"
@@ -68,15 +67,10 @@ const { stage, inlineResources = false } = Astro.props as {
       )}
       {group.items && (
         <div class="chip-grid">
-              {group.items.map((item: string) => <span>{item}</span>)}
+          {group.items.map((item: string) => <span>{item}</span>)}
         </div>
       )}
-      {group.resources && inlineResources && (
-        <div class="resource-inline" aria-label={`${group.title}，${group.resources.length} 个资源`}>
-          <ResourceList resources={group.resources} />
-        </div>
-      )}
-      {group.resources && !inlineResources && (
+      {group.resources && (
         <details class="resource-details" id={resourcePanelId}>
           <summary>
             {group.resources.length} 个资源

@@ -1,0 +1,146 @@
+---
+type Subtopic = {
+  id: string;
+  title: string;
+  color?: string;
+};
+
+type Stage = {
+  id?: string;
+  title: string;
+  summary?: string;
+  color?: string;
+  subtopics?: Subtopic[];
+};
+
+const { stage, index, isLast = false } = Astro.props as {
+  stage: Stage;
+  index: number;
+  isLast?: boolean;
+};
+
+const panelId = `intro-panel-${stage.id || index}`;
+const assetNumber = String(index + 1).padStart(2, "0");
+const icons = ["leaf", "book", "bolt", "star", "bot"];
+const icon = icons[index] || "leaf";
+const imageDimensions = [
+  [622, 676],
+  [676, 655],
+  [676, 640],
+  [619, 676],
+  [638, 676]
+];
+const [imageWidth, imageHeight] = imageDimensions[index] || imageDimensions[0];
+
+const getSubtopicIcon = (id: string) => {
+  switch (id) {
+    case "research":
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+    case "understanding":
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M9 10h.01"></path><path d="M14 10h.01"></path><path d="M19 10h.01"></path></svg>';
+    case "knowledge":
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>';
+    case "writing":
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>';
+    case "media":
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+    case "coding":
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>';
+    case "agent":
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h8a4 4 0 0 1 4 4v7H4v-7a4 4 0 0 1 4-4Z"/><path d="M12 6V3m-4 9h.01M16 12h.01M8 21v-4m8 4v-4"/></svg>';
+    default:
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>';
+  }
+};
+---
+
+<article
+  class={`island-stage tone-${stage.color || "green"} ${isLast ? "is-last" : ""}`}
+  data-stage-id={stage.id}
+  style={`--stage-index:${index};`}
+>
+  <div class="stage-island">
+    <picture class="island-picture">
+      <source srcset={`/assets/islands/roadmap/island-${assetNumber}.webp`} type="image/webp" />
+      <img
+        src={`/assets/islands/roadmap/island-${assetNumber}.png`}
+        alt={`${stage.title}阶段的悬浮小岛`}
+        width={imageWidth}
+        height={imageHeight}
+        loading={index === 0 ? "eager" : "lazy"}
+        fetchpriority={index === 0 ? "high" : "auto"}
+        decoding="async"
+      />
+    </picture>
+  </div>
+
+  <div class="stage-action">
+    <span class="stage-connector" aria-hidden="true"></span>
+    <button
+      class="stage-pill"
+      type="button"
+      aria-expanded="false"
+      aria-controls={panelId}
+      data-intro-trigger
+    >
+      <span class={`stage-pill-icon icon-${icon}`} aria-hidden="true">
+        {icon === "book" && (
+          <svg viewBox="0 0 24 24"><path d="M5 4.5h10.5A2.5 2.5 0 0 1 18 7v12H7.5A2.5 2.5 0 0 1 5 16.5v-12Z"/><path d="M8 8h6M8 12h6M7.5 19A2.5 2.5 0 0 1 5 16.5"/></svg>
+        )}
+        {icon === "bolt" && <svg viewBox="0 0 24 24"><path d="m13 2-7 12h6l-1 8 7-12h-6l1-8Z"/></svg>}
+        {icon === "star" && <svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.7L21 10l-4.5 4.4 1 6.3-5.5-3-5.5 3 1-6.3L3 10l6.3-1.3L12 3Z"/></svg>}
+        {icon === "bot" && <svg viewBox="0 0 24 24"><path d="M8 6h8a4 4 0 0 1 4 4v7H4v-7a4 4 0 0 1 4-4Z"/><path d="M12 6V3m-4 9h.01M16 12h.01M8 21v-4m8 4v-4"/></svg>}
+        {icon === "leaf" && <svg viewBox="0 0 24 24"><path d="M6 18c1-7 5-11 13-12-1 8-5 12-13 12Z"/><path d="M6 18c3-3 6-5 10-7"/></svg>}
+      </span>
+      <span class="stage-pill-copy">
+        <span class="stage-pill-title">{stage.title}</span>
+      </span>
+      <svg class="stage-pill-arrow" aria-hidden="true" viewBox="0 0 24 24">
+        <path d="m9 6 6 6-6 6" />
+      </svg>
+    </button>
+
+    {stage.subtopics && stage.subtopics.length === 1 && (
+      <div class="subtopics-wrapper">
+        <span class="stage-connector sub-connector" aria-hidden="true"></span>
+        <button
+          class={`stage-pill sub-pill tone-${stage.subtopics[0].color || "green"}`}
+          type="button"
+          aria-expanded="false"
+          aria-controls={`intro-panel-${stage.subtopics[0].id}`}
+          data-intro-trigger
+        >
+          <span class="stage-pill-icon" aria-hidden="true" set:html={getSubtopicIcon(stage.subtopics[0].id)} />
+          <span class="stage-pill-copy">
+            <span class="stage-pill-title">{stage.subtopics[0].title}</span>
+          </span>
+          <svg class="stage-pill-arrow" aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m9 6 6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+    )}
+
+    {stage.subtopics && stage.subtopics.length > 1 && (
+      <div class="subtopics-wrapper">
+        <span class="stage-connector sub-connector" aria-hidden="true"></span>
+        <div class="subtopics-popover">
+          <div class="subtopics-grid">
+            {stage.subtopics.map(topic => (
+              <button
+                class={`subtopic-item tone-${topic.color || "green"}`}
+                type="button"
+                aria-expanded="false"
+                aria-controls={`intro-panel-${topic.id}`}
+                data-intro-trigger
+              >
+                <span class="subtopic-icon" aria-hidden="true" set:html={getSubtopicIcon(topic.id)} />
+                <span class="subtopic-title">{topic.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+</article>

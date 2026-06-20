@@ -16,6 +16,7 @@
     "typescript": "^5.4.0"
   },
   "overrides": {
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.0",
+    "esbuild": "^0.28.1"
   }
 }

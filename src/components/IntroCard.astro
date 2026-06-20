@@ -14,22 +14,31 @@ type Resource = {
 
 type Group = {
   title: string;
+  description?: string | string[];
   items?: string[];
   resources?: Resource[];
 };
 
-const { id, title, summary, sections = [], groups = [] } = Astro.props as {
+type Subtopic = {
+  id: string;
+  title: string;
+  color?: string;
+};
+
+const { id, title, summary, sections = [], groups = [], subtopics = [], defaultOpen = false } = Astro.props as {
   id: string;
   title?: string;
   summary?: string;
   sections?: IntroSection[];
   groups?: Group[];
+  subtopics?: Subtopic[];
+  defaultOpen?: boolean;
 };
 ---
 
-<aside class="intro-popover" id={id} data-intro-panel data-open="false" aria-hidden="true">
+<section class={`intro-popover ${defaultOpen ? "is-open" : ""}`} id={id} data-intro-panel data-open={String(defaultOpen)} aria-hidden={!defaultOpen}>
   <button class="intro-popover-close" type="button" aria-label="收起详情侧边栏" data-intro-close>
-    ×
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></svg>
   </button>
 
   <div class="intro-popover-body">
@@ -51,6 +60,6 @@ const { id, title, summary, sections = [], groups = [] } = Astro.props as {
       </section>
     ))}
 
-    {groups.length > 0 && <StagePanel stage={{ id, groups }} inlineResources />}
+    {(groups.length > 0 || subtopics.length > 0) && <StagePanel stage={{ id, groups, subtopics }} />}
   </div>
-</aside>
+</section>

@@ -1,19 +1,10 @@
 ---
-import RoadmapStage from "./RoadmapStage.astro";
-import IntroCard from "./IntroCard.astro";
-
-type IntroSection = {
-  title: string;
-  paragraphs: string[];
-};
+import IslandStage from "./IslandStage.astro";
 
 type Stage = {
   id?: string;
   title: string;
   summary?: string;
-  intro?: IntroSection[];
-  drawer?: boolean;
-  groups?: any[];
   subtopics?: Stage[];
 };
 
@@ -23,45 +14,485 @@ const { roadmap } = Astro.props as {
     stages: Stage[];
   };
 };
-
-const drawerStages = roadmap.stages.flatMap((stage) => [
-  ...(stage.intro?.length || stage.drawer ? [stage] : []),
-  ...(stage.subtopics || [])
-]);
 ---
 
 <main class="page-shell">
-  <section class="roadmap-board" aria-label={roadmap.title}>
-    <div class="roadmap-title">
-      <h1>{roadmap.title}</h1>
-    </div>
+  <div class="product-workspace" id="top">
+    <section class="roadmap-board" aria-label={roadmap.title}>
+      <div class="roadmap-title">
+        <h1>{roadmap.title}</h1>
+      </div>
 
-    <div class="roadmap-flow">
-      {roadmap.stages.map((stage, index: number) => (
-        <RoadmapStage stage={stage} index={index} />
-      ))}
-    </div>
-  </section>
+      <div class="roadmap-flow">
+        {roadmap.stages.map((stage, index: number) => (
+          <IslandStage stage={stage} index={index} isLast={index === roadmap.stages.length - 1} />
+        ))}
+      </div>
+    </section>
 
-  {drawerStages.length > 0 && (
-    <>
-      <button
-        class="intro-scrim"
-        type="button"
-        aria-label="关闭详情侧边栏"
-        aria-hidden="true"
-        tabindex="-1"
-        data-intro-close-overlay
-      ></button>
-      {drawerStages.map((stage, index) => (
-        <IntroCard
-          id={`intro-panel-${stage.id || index}`}
-          title={stage.intro?.length ? undefined : stage.title}
-          summary={stage.intro?.length ? undefined : stage.summary}
-          sections={stage.intro}
-          groups={stage.intro?.length ? undefined : stage.groups}
-        />
-      ))}
-    </>
-  )}
+    <aside class="detail-dock" aria-label="阶段详情"></aside>
+  </div>
+
+  <button
+    class="intro-scrim"
+    type="button"
+    aria-label="关闭详情页"
+    aria-hidden="true"
+    tabindex="-1"
+    data-intro-close-overlay
+  ></button>
 </main>
+
+<script>
+  type IntroSection = {
+    title: string;
+    paragraphs: string[];
+  };
+
+  type Resource = {
+    label: string;
+    url: string;
+    note?: string;
+  };
+
+  type Group = {
+    title: string;
+    description?: string | string[];
+    items?: string[];
+    resources?: Resource[];
+  };
+
+  type Subtopic = {
+    id: string;
+    title: string;
+    color?: string;
+  };
+
+  type PanelData = {
+    id: string;
+    title?: string;
+    summary?: string;
+    sections?: IntroSection[];
+    groups?: Group[];
+    subtopics?: Subtopic[];
+  };
+
+  type PanelMap = Record<string, PanelData>;
+
+  const setupStagePanels = () => {
+    const PANEL_DATA_URL = "/roadmap-data.json";
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mobileQuery = window.matchMedia("(max-width: 900px)");
+    const overlay = document.querySelector<HTMLButtonElement>("[data-intro-close-overlay]");
+    const workspace = document.querySelector<HTMLElement>(".product-workspace");
+    const detailDock = document.querySelector<HTMLElement>(".detail-dock");
+    let lockedScrollY = 0;
+    let panelDataPromise: Promise<PanelMap> | null = null;
+
+    const getPanels = () => Array.from(document.querySelectorAll<HTMLElement>("[data-intro-panel]"));
+    const getTriggers = () => Array.from(document.querySelectorAll<HTMLButtonElement>("[data-intro-trigger]"));
+
+    const getSafeExternalUrl = (value: string) => {
+      try {
+        const url = new URL(value);
+        return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const createElement = <K extends keyof HTMLElementTagNameMap>(
+      tagName: K,
+      className?: string,
+      textContent?: string
+    ) => {
+      const element = document.createElement(tagName);
+      if (className) element.className = className;
+      if (typeof textContent === "string") element.textContent = textContent;
+      return element;
+    };
+
+    const createSvg = (pathValue: string, className?: string) => {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      if (className) svg.setAttribute("class", className);
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", pathValue);
+      svg.append(path);
+      return svg;
+    };
+
+    const finishResourceAnimation = (details: HTMLDetailsElement, reveal: HTMLElement) => {
+      details.classList.remove("is-animating", "is-closing");
+      reveal.style.height = "";
+      reveal.style.opacity = "";
+      reveal.style.transform = "";
+    };
+
+    const playRevealAnimation = (
+      reveal: HTMLElement,
+      keyframes: Keyframe[],
+      onFinish: () => void
+    ) => {
+      const animation = reveal.animate(keyframes, {
+        duration: 300,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        fill: "forwards"
+      });
+
+      window.setTimeout(() => {
+        onFinish();
+        animation.cancel();
+      }, 300);
+    };
+
+    const enhanceResourceDetails = (root: ParentNode) => {
+      root.querySelectorAll(".resource-details").forEach((detailsElement) => {
+        const details = detailsElement as HTMLDetailsElement;
+        const summary = details.querySelector("summary");
+        const reveal = details.querySelector(".resource-reveal") as HTMLElement | null;
+
+        if (!summary || !reveal || details.dataset.enhanced === "true") {
+          return;
+        }
+
+        details.dataset.enhanced = "true";
+
+        summary.addEventListener("click", (event) => {
+          event.preventDefault();
+
+          if (reduceMotion.matches) {
+            details.open = !details.open;
+            return;
+          }
+
+          if (details.classList.contains("is-animating")) {
+            return;
+          }
+
+          details.classList.add("is-animating");
+
+          if (!details.open) {
+            details.open = true;
+            playRevealAnimation(
+              reveal,
+              [
+                { height: "0px", opacity: 0, transform: "translateY(-4px)" },
+                { height: `${reveal.scrollHeight}px`, opacity: 1, transform: "translateY(0)" }
+              ],
+              () => finishResourceAnimation(details, reveal)
+            );
+            return;
+          }
+
+          details.classList.add("is-closing");
+          playRevealAnimation(
+            reveal,
+            [
+              { height: `${reveal.scrollHeight}px`, opacity: 1, transform: "translateY(0)" },
+              { height: "0px", opacity: 0, transform: "translateY(-4px)" }
+            ],
+            () => {
+              details.open = false;
+              finishResourceAnimation(details, reveal);
+            }
+          );
+        });
+      });
+    };
+
+    const renderResourceList = (resources: Resource[]) => {
+      const list = createElement("ul", "resource-list");
+
+      resources.forEach((resource) => {
+        const listItem = document.createElement("li");
+        const safeUrl = getSafeExternalUrl(resource.url);
+        const content = createElement("span", "resource-link-content");
+        content.append(createElement("span", "resource-link-title", resource.label));
+        if (resource.note) {
+          content.append(createElement("span", "resource-link-note", resource.note));
+        }
+
+        if (safeUrl) {
+          const link = document.createElement("a");
+          link.href = safeUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer external";
+          link.append(content, createSvg("M7 17 17 7M9 7h8v8"));
+          listItem.append(link);
+        } else {
+          const unavailable = createElement("span", "resource-link-unavailable");
+          unavailable.append(content);
+          listItem.append(unavailable);
+        }
+
+        list.append(listItem);
+      });
+
+      return list;
+    };
+
+    const renderStageGroups = (panelData: PanelData) => {
+      const stageGroups = createElement("div", "stage-groups");
+
+      if (panelData.subtopics?.length) {
+        const capabilityCard = createElement("section", "group-card capability-card");
+        capabilityCard.append(createElement("h2", undefined, "能力模块"));
+
+        const capabilityGrid = createElement("div", "capability-grid");
+        panelData.subtopics.forEach((topic) => {
+          const button = createElement("button", `capability-button tone-${topic.color || "green"}`) as HTMLButtonElement;
+          button.type = "button";
+          button.setAttribute("aria-expanded", "false");
+          button.setAttribute("aria-controls", `intro-panel-${topic.id}`);
+          button.dataset.introTrigger = "";
+          button.textContent = topic.title;
+          capabilityGrid.append(button);
+        });
+
+        capabilityCard.append(capabilityGrid);
+        stageGroups.append(capabilityCard);
+      }
+
+      panelData.groups?.forEach((group, index) => {
+        const groupCard = createElement("section", "group-card");
+        groupCard.append(createElement("h2", undefined, group.title));
+
+        if (group.description) {
+          const description = createElement("div", "group-description");
+          const paragraphs = Array.isArray(group.description) ? group.description : [group.description];
+          paragraphs.forEach((paragraph) => description.append(createElement("p", undefined, paragraph)));
+          groupCard.append(description);
+        }
+
+        if (group.items?.length) {
+          const chipGrid = createElement("div", "chip-grid");
+          group.items.forEach((item) => chipGrid.append(createElement("span", undefined, item)));
+          groupCard.append(chipGrid);
+        }
+
+        if (group.resources?.length) {
+          const details = createElement("details", "resource-details") as HTMLDetailsElement;
+          details.id = `${panelData.id || "stage"}-${index}-resources`;
+          details.append(createElement("summary", undefined, `${group.resources.length} 个资源`));
+
+          const reveal = createElement("div", "resource-reveal");
+          reveal.append(renderResourceList(group.resources));
+          details.append(reveal);
+          groupCard.append(details);
+        }
+
+        stageGroups.append(groupCard);
+      });
+
+      return stageGroups;
+    };
+
+    const renderPanel = (panelData: PanelData) => {
+      const panel = createElement("section", "intro-popover");
+      panel.id = panelData.id;
+      panel.dataset.introPanel = "";
+      panel.dataset.open = "false";
+      panel.setAttribute("aria-hidden", "true");
+
+      const closeButton = createElement("button", "intro-popover-close") as HTMLButtonElement;
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "收起详情侧边栏");
+      closeButton.dataset.introClose = "";
+      closeButton.append(createSvg("m6 6 12 12M18 6 6 18"));
+
+      const body = createElement("div", "intro-popover-body");
+
+      if (panelData.title || panelData.summary) {
+        const overview = createElement("section", "intro-section intro-overview");
+        if (panelData.title) overview.append(createElement("h2", undefined, panelData.title));
+        if (panelData.summary) overview.append(createElement("p", "intro-lead", panelData.summary));
+        body.append(overview);
+      }
+
+      panelData.sections?.forEach((section, sectionIndex) => {
+        const sectionNode = createElement("section", "intro-section");
+        sectionNode.append(createElement("h2", undefined, section.title));
+
+        section.paragraphs.forEach((paragraph, paragraphIndex) => {
+          const paragraphNode = createElement(
+            "p",
+            sectionIndex === 0 && paragraphIndex === 0 ? "intro-lead" : undefined,
+            paragraph
+          );
+          sectionNode.append(paragraphNode);
+        });
+
+        body.append(sectionNode);
+      });
+
+      if ((panelData.groups?.length || 0) > 0 || (panelData.subtopics?.length || 0) > 0) {
+        body.append(renderStageGroups(panelData));
+      }
+
+      panel.append(closeButton, body);
+      enhanceResourceDetails(panel);
+      return panel;
+    };
+
+    const loadPanelData = async () => {
+      if (!panelDataPromise) {
+        panelDataPromise = fetch(PANEL_DATA_URL, { credentials: "same-origin" }).then(async (response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to load panel data: ${response.status}`);
+          }
+
+          return response.json() as Promise<PanelMap>;
+        });
+      }
+
+      return panelDataPromise;
+    };
+
+    const ensurePanel = async (panelId: string) => {
+      const existingPanel = document.getElementById(panelId);
+      if (existingPanel) return existingPanel as HTMLElement;
+      if (!detailDock) return null;
+
+      const panelDataMap = await loadPanelData();
+      const panelData = panelDataMap[panelId];
+      if (!panelData) return null;
+
+      const panel = renderPanel(panelData);
+      detailDock.append(panel);
+      return panel;
+    };
+
+    const unlockPage = () => {
+      if (document.body.dataset.drawerLocked !== "true") return;
+      document.body.dataset.drawerLocked = "false";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.documentElement.style.overflow = "";
+      window.scrollTo(0, lockedScrollY);
+    };
+
+    const lockPage = () => {
+      if (!mobileQuery.matches || document.body.dataset.drawerLocked === "true") return;
+      lockedScrollY = window.scrollY;
+      document.body.dataset.drawerLocked = "true";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${lockedScrollY}px`;
+      document.body.style.width = "100%";
+      document.documentElement.style.overflow = "hidden";
+    };
+
+    const closeAll = (restoreFocus = false) => {
+      const triggers = getTriggers();
+      const panels = getPanels();
+      const activeTrigger = triggers.find((trigger) => trigger.getAttribute("aria-expanded") === "true");
+
+      panels.forEach((panel) => {
+        panel.dataset.open = "false";
+        panel.classList.remove("is-open");
+        panel.setAttribute("aria-hidden", "true");
+      });
+      triggers.forEach((trigger) => trigger.setAttribute("aria-expanded", "false"));
+      document.querySelectorAll(".island-stage.is-active").forEach((stage) => stage.classList.remove("is-active"));
+      document.body.dataset.introDrawerOpen = "false";
+      workspace?.classList.remove("is-detail-open");
+      overlay?.setAttribute("aria-hidden", "true");
+      if (overlay) overlay.tabIndex = -1;
+      unlockPage();
+      if (restoreFocus) activeTrigger?.focus({ preventScroll: true });
+    };
+
+    const openPanel = async (trigger: HTMLButtonElement) => {
+      const panelId = trigger.getAttribute("aria-controls");
+      const alreadyOpen = trigger.getAttribute("aria-expanded") === "true";
+
+      if (alreadyOpen) {
+        closeAll(false);
+        return;
+      }
+
+      if (!panelId) return;
+
+      trigger.dataset.loading = "true";
+      const panel = await ensurePanel(panelId);
+      delete trigger.dataset.loading;
+      if (!panel) return;
+
+      closeAll(false);
+      panel.dataset.open = "true";
+      panel.classList.add("is-open");
+      panel.setAttribute("aria-hidden", "false");
+      trigger.setAttribute("aria-expanded", "true");
+      trigger.closest(".island-stage")?.classList.add("is-active");
+      workspace?.classList.add("is-detail-open");
+      panel.querySelector<HTMLElement>(".intro-popover-body")?.scrollTo({ top: 0 });
+
+      if (mobileQuery.matches) {
+        document.body.dataset.introDrawerOpen = "true";
+        overlay?.setAttribute("aria-hidden", "false");
+        if (overlay) overlay.tabIndex = 0;
+        lockPage();
+      }
+    };
+
+    document.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement | null;
+      const trigger = target?.closest<HTMLButtonElement>("[data-intro-trigger]");
+      if (trigger) {
+        void openPanel(trigger);
+        return;
+      }
+
+      if (target?.closest("[data-intro-close]")) {
+        closeAll(true);
+      }
+    });
+
+    overlay?.addEventListener("click", () => closeAll(true));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && getPanels().some((panel) => panel.dataset.open === "true")) closeAll(true);
+    });
+
+    const syncViewport = () => {
+      const panels = getPanels();
+      const triggers = getTriggers();
+
+      if (mobileQuery.matches) {
+        closeAll(false);
+        return;
+      }
+      unlockPage();
+      const activePanel = panels.find((panel) => panel.dataset.open === "true");
+      if (activePanel) {
+        const activeTrigger = triggers.find((trigger) => trigger.getAttribute("aria-controls") === activePanel.id);
+        activeTrigger?.setAttribute("aria-expanded", "true");
+        activeTrigger?.closest(".island-stage")?.classList.add("is-active");
+        workspace?.classList.add("is-detail-open");
+      } else {
+        workspace?.classList.remove("is-detail-open");
+      }
+    };
+
+    mobileQuery.addEventListener("change", syncViewport);
+    const requestIdle = window.requestIdleCallback?.bind(window);
+    if (requestIdle) {
+      requestIdle(() => {
+        void loadPanelData();
+      }, { timeout: 1500 });
+    } else {
+      setTimeout(() => {
+        void loadPanelData();
+      }, 600);
+    }
+
+    syncViewport();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupStagePanels, { once: true });
+  } else {
+    setupStagePanels();
+  }
+</script>
