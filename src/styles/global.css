@@ -1,5 +1,5 @@
 :root {
-  --canvas: #f8f7f5;
+  --canvas: #faf8f6;
   --paper: #fbfcfb;
   --card: #ffffff;
   --ink: #202823;
@@ -193,6 +193,10 @@ a {
   padding-bottom: 28px;
 }
 
+.island-stage:not(.is-last) {
+  margin-bottom: clamp(-18px, -1.5vw, -12px);
+}
+
 .stage-island {
   position: relative;
   z-index: 1;
@@ -222,6 +226,17 @@ a {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.island-picture img {
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 3%, #000 97%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%),
+    linear-gradient(to bottom, transparent 0, #000 3%, #000 97%, transparent 100%);
+  mask-composite: intersect;
 }
 
 .stage-action {
