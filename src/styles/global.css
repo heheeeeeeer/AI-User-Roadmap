@@ -354,9 +354,9 @@ a {
 .stage-pill {
   appearance: none;
   display: grid;
-  grid-template-columns: 35px minmax(0, 1fr) 16px;
+  grid-template-columns: 44px minmax(0, 1fr) 16px;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   width: 100%;
   min-height: 66px;
   padding: 10px 12px;
@@ -406,10 +406,20 @@ a {
   stroke-linejoin: round;
 }
 
-.icon-star svg,
-.icon-bolt svg {
-  fill: currentColor;
-  stroke-width: 1.2;
+.stage-main-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  overflow: hidden;
+}
+
+.stage-main-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .stage-pill-copy {
@@ -803,8 +813,9 @@ a {
   .island-stage { grid-template-columns: minmax(225px, 1fr) minmax(145px, 175px); }
   .island-picture { width: min(235px, 94%); }
   .stage-connector { margin-left: -30px; }
-  .stage-pill { grid-template-columns: 31px minmax(0, 1fr) 14px; gap: 7px; padding: 9px; }
+  .stage-pill { grid-template-columns: 38px minmax(0, 1fr) 14px; gap: 7px; padding: 9px; }
   .stage-pill-icon { width: 31px; height: 31px; }
+  .stage-main-icon { width: 38px; height: 38px; border-radius: 10px; }
   .stage-pill-title { font-size: 14px; }
 }
 
@@ -857,12 +868,13 @@ a {
   .island-picture { width: min(205px, 112%); }
   .stage-connector { flex-basis: 23px; min-width: 12px; margin-left: -26px; }
   .stage-pill {
-    grid-template-columns: 30px minmax(0, 1fr) 12px;
+    grid-template-columns: 36px minmax(0, 1fr) 12px;
     gap: 6px;
     min-height: 56px;
     padding: 8px;
   }
   .stage-pill-icon { width: 30px; height: 30px; border-radius: 6px; }
+  .stage-main-icon { width: 36px; height: 36px; border-radius: 10px; }
   .stage-pill-icon svg { width: 17px; height: 17px; }
   .stage-pill-title { font-size: 13px; }
   .stage-pill-arrow { width: 12px; height: 12px; }

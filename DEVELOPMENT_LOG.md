@@ -2,6 +2,38 @@
 
 每次修改本项目后，都需要在这里追加记录。下一次修改前必须先阅读本文件，并确认上一条记录里的回归检查点没有复现。
 
+## 2026-06-26（替换主阶段按钮为软 3D 图片 Icon）
+
+### 改动摘要
+
+- 将前言、基础概念、快速上手、核心能力、进阶使用五个主阶段按钮的旧内联 SVG 图标替换为新生成的软 3D 图片 Icon。
+- 新增 `public/assets/stage-icons/` 静态资源目录，并将 5 张 Icon 统一压缩为 `512x512` PNG，用于页面按钮内展示。
+- 调整主阶段按钮左侧图标列宽和 `.stage-main-icon` 样式，让图片 Icon 在桌面、平板和移动端都保持足够可读的尺寸。
+- 保留二级标题的现有 SVG 小图标，不影响信息调研、编程能力、Agent 等子模块入口。
+
+### 影响文件
+
+- `src/components/IslandStage.astro`
+- `src/styles/global.css`
+- `public/assets/stage-icons/intro.png`
+- `public/assets/stage-icons/basics.png`
+- `public/assets/stage-icons/quick-start.png`
+- `public/assets/stage-icons/core.png`
+- `public/assets/stage-icons/advanced.png`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+- 确认仅替换主阶段按钮图标，二级标题图标仍使用原有 SVG 逻辑。
+- 保留前次岛屿布局、水流间距、资源按需加载和移动端抽屉相关代码路径，未改动路线图主体数据。
+
+### 下一次改动前需要防止复现
+
+- 后续继续替换图标时，不要把项目引用指向 `$CODEX_HOME/generated_images`，正式资源必须落在 `public/` 下。
+- 如果调整按钮尺寸，需要同时回归桌面、平板和移动端，避免图片 Icon 被压得过小或挤压标题文字。
+- 不要误删二级标题 SVG 图标逻辑，除非明确要为二级标题也生成并接入独立 Icon。
+
 ## 2026-06-21（收紧瀑布与下一座岛之间的纵向间距）
 
 ### 改动摘要
@@ -955,3 +987,61 @@
 - 不要恢复页面右上角的原文文档入口，除非确认该文档可以公开。
 - 新增资源链接时避免提交个人 token、追踪参数或非 `http` / `https` 协议链接。
 - 升级依赖后继续运行 `npm run build` 和 `npm audit`。
+
+## 2026-06-22（阶段导航图标预览）
+
+### 改动摘要
+
+- 参考已确认的前言图标风格，生成一套圆润、低饱和、软 3D 玩具感的一级阶段导航图标。
+- 本轮覆盖前言、基础概念、快速上手、核心能力和进阶使用；信息调研、编程能力、Agent 等二级标题图标按要求暂不生成。
+- 图标目前仅作为预览素材保存，尚未替换网站现有导航图标。
+
+### 影响文件
+
+- `output/imagegen/stage-icons/intro.png`
+- `output/imagegen/stage-icons/basic.png`
+- `output/imagegen/stage-icons/quick.png`
+- `output/imagegen/stage-icons/core.png`
+- `output/imagegen/stage-icons/advanced.png`
+- `output/imagegen/stage-icons/preview.png`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- 五张独立图标均统一缩放为 512 × 512 PNG，并确认不含透明通道。
+- 生成 768 × 512 合集预览，检查了图标的配色区分、圆润造型和小尺寸轮廓可读性。
+- `npm run build` 通过。
+
+### 下一次改动前需要防止复现
+
+- 未经用户确认前不要把预览图标接入网站。
+- 后续接入时需要在实际 20–35px 导航尺寸检查清晰度、对齐和背景融合，避免引入横向溢出或改变路线图布局。
+- 继续保持二级标题无图标，除非用户明确要求补充。
+
+## 2026-06-22（阶段导航图标轻量化第二版）
+
+### 改动摘要
+
+- 以前言图标为严格视觉母版，重新设计快速上手、核心能力和进阶使用三个一级阶段图标。
+- 统一为“轻薄白色主体 + 小型彩色语义符号”的结构，移除旧稿中过厚的底座、圆环和堆叠台阶。
+- 保留第一版文件，第二版使用 `-v2` 文件名，网站现有图标仍未替换。
+
+### 影响文件
+
+- `output/imagegen/stage-icons/quick-v2.png`
+- `output/imagegen/stage-icons/core-v2.png`
+- `output/imagegen/stage-icons/advanced-v2.png`
+- `output/imagegen/stage-icons/preview-v2.png`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- 检查第二版合集预览，确认五张图标在主体材质、透视、留白、阴影和视觉重量上更接近同一套设计语言。
+- 三张第二版图标均为 512 × 512 PNG。
+- `npm run build` 通过。
+
+### 下一次改动前需要防止复现
+
+- 接入网站前需由用户确认第二版方向，并在 20–35px 实际尺寸验证语义和辨识度。
+- 不要重新引入厚底座、大圆环、大面积彩色块或堆叠体块。
+- 二级标题图标继续保持暂不生成、暂不接入。

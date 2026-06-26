@@ -21,8 +21,14 @@ const { stage, index, isLast = false } = Astro.props as {
 
 const panelId = `intro-panel-${stage.id || index}`;
 const assetNumber = String(index + 1).padStart(2, "0");
-const icons = ["leaf", "book", "bolt", "star", "bot"];
-const icon = icons[index] || "leaf";
+const stageIconAssets = [
+  "/assets/stage-icons/intro.png",
+  "/assets/stage-icons/basics.png",
+  "/assets/stage-icons/quick-start.png",
+  "/assets/stage-icons/core.png",
+  "/assets/stage-icons/advanced.png"
+];
+const stageIconAsset = stageIconAssets[index] || stageIconAssets[0];
 const imageDimensions = [
   [700, 565],
   [700, 564],
@@ -83,14 +89,15 @@ const getSubtopicIcon = (id: string) => {
       aria-controls={panelId}
       data-intro-trigger
     >
-      <span class={`stage-pill-icon icon-${icon}`} aria-hidden="true">
-        {icon === "book" && (
-          <svg viewBox="0 0 24 24"><path d="M5 4.5h10.5A2.5 2.5 0 0 1 18 7v12H7.5A2.5 2.5 0 0 1 5 16.5v-12Z"/><path d="M8 8h6M8 12h6M7.5 19A2.5 2.5 0 0 1 5 16.5"/></svg>
-        )}
-        {icon === "bolt" && <svg viewBox="0 0 24 24"><path d="m13 2-7 12h6l-1 8 7-12h-6l1-8Z"/></svg>}
-        {icon === "star" && <svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.7L21 10l-4.5 4.4 1 6.3-5.5-3-5.5 3 1-6.3L3 10l6.3-1.3L12 3Z"/></svg>}
-        {icon === "bot" && <svg viewBox="0 0 24 24"><path d="M8 6h8a4 4 0 0 1 4 4v7H4v-7a4 4 0 0 1 4-4Z"/><path d="M12 6V3m-4 9h.01M16 12h.01M8 21v-4m8 4v-4"/></svg>}
-        {icon === "leaf" && <svg viewBox="0 0 24 24"><path d="M6 18c1-7 5-11 13-12-1 8-5 12-13 12Z"/><path d="M6 18c3-3 6-5 10-7"/></svg>}
+      <span class="stage-pill-icon stage-main-icon" aria-hidden="true">
+        <img
+          src={stageIconAsset}
+          alt=""
+          width="512"
+          height="512"
+          loading={index === 0 ? "eager" : "lazy"}
+          decoding="async"
+        />
       </span>
       <span class="stage-pill-copy">
         <span class="stage-pill-title">{stage.title}</span>
