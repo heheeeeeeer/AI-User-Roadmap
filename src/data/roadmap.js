@@ -6,23 +6,30 @@ export const roadmap = {
       title: "前言",
       color: "gray",
       side: "left",
-      summary: "如果你想用好 AI ，却不知道从哪里开始，可以参考这份 Roadmap。",
+      summary: "如果你想用好 AI，却不知道从哪里开始，可以参考这份 Roadmap。",
       intro: [
         {
-          title: "预先声明",
+          title: "为什么整理这份 Roadmap",
           paragraphs: [
-            "一句话概括：如果你想用好 AI ，却不知道从哪里开始，可以参考这份 Roadmap。",
-            "灵感来自于 roadmap.sh & csdiy.wiki，AI 收集初审，人工整理复审。",
-            "项目开源免费，如有内容推荐或者需要下架的，可以联系 heheer@zju.edu.cn"
+            "做了几期 AI 科普后，我收到最多的反馈是：大家都知道 AI 很有用，也被铺天盖地的 AI 宣传包围着，但真正用起来，好像也就是有事问问豆包，效果还不一定好。想再学深一点，又不知道该从哪里开始。",
+            "于是我回顾了下自己学习和使用 AI 的过程，发现也踩了不少的坑，比如我曾经买过一个 99 元的 AI 课程，结果两个小时几乎都是车轱辘话，还不如后来刷到的同主题免费视频；又比如有一段时间用过某个 Claude Code 中转服务，后来被扒出来实际接入的是便宜的国产模型；再比如花了半个小时认真读一篇文章，照着测试后发现效果和文中描述完全不一样，然后才意识到那是一篇虚假的公关稿...... AI 的快速发展除了提升互联网行业的生产力，但与此同时，也让很多传统行业里的技术小白突然被推到浪潮面前，不知道该怎么开始。",
+            "所以这份 Roadmap 想做的事很简单：尽可能减少噪音和摩擦，给出一条真实、清晰、低门槛、易上手的学习路径，让每个愿意学习的人都能更顺利地开始使用 AI。"
           ]
         },
         {
-          title: "其他碎碎念",
+          title: "这份 Roadmap 适合谁",
           paragraphs: [
-            "最初想做这个项目，是因为有视频观众问我该如何学习和使用 AI。于是我去参考了 roadmap.sh，发现里面的 AI Engineer Roadmap 更偏向 AI 开发，并不太适合普通 AI 使用者。",
-            "本以为找不到资源只能表示抱歉了，突然想到自己之前买过一个 99 元的 AI 课程，结果两个小时里都是车轱辘话，还不如某次在 B 站刷到的同主题免费视频。所以为了减少类似的情况，我决定自己整理一个由免费、高质量、好上手的资源组成的、面向 AI 使用者的 Roadmap。",
-            "真正开始整理后，才发现网络上充斥着大量标题夸张、内容浮夸的教程，想要找到真正有价值的内容对新手来说非常困难。也因此，我更决定要把这个项目做好，帮助想学习 AI 的人少走一些弯路。",
-            "我希望这个项目不只是一个资源列表，而是一条任何人都能马上开始的学习路径。让大家不用先被信息噪音劝退，也不用花冤枉钱试错，而是能从真实、有用、免费的内容开始，逐步建立对 AI 的理解，学会把 AI 变成自己工作、学习和创作中的可靠工具。"
+            "由于我也不是什么 AI 专家，只是一个扎实踩过坑，才把 AI 深度融入日常的普通使用者，我只能提供从一个小白到熟练使用 AI 的路径，至于更深入的 AI 应用开发或底层研究，就不在这份 Roadmap 的主要范围里了。",
+            "如果你时间比较充裕，或者正处在职业、学习方向的转型期，可以慢慢探索这份 Roadmap 的每一个角落，里面的资源都经过认真筛选，很多也是我反复看过或实践过的，我相信多多少少会给你带来一些启发。",
+            "如果你已经有具体的工作问题要解决，也可以直接跳到对应的 AI 能力模块，从中找到适合自己的能力和工具，直接拿来用，或者参考其中的思路，很多场景都会有帮助。"
+          ]
+        },
+        {
+          title: "这里会有什么",
+          paragraphs: [
+            "这里目前整理了我长期收藏、反复筛选过的一些内容，并按不同能力和使用场景放到了对应的位置，所有资源都是免费的，优质的，好上手的。",
+            "后续也会跟着 AI 的发展持续更新，不过并不会一味地追热点，而是同样会经过严格的人工筛选，尽量确保不同阶段的读者看了都有收获，也能找到可以马上尝试的内容。",
+            "如果你有更好的内容推荐，或者认为某些内容不合适需要下架，可以联系 heheer@zju.edu.cn。"
           ]
         }
       ]
@@ -44,7 +51,7 @@ export const roadmap = {
               note: "23 年的视频，大部分内容在现在看来也不会过时。从大语言模型就是一个参数文件 + 一个运行文件开始，一点点深入，举了很多容易理解的例子来解释。"
             },
             {
-              label: "3Blue1Brown / Large Language Models explained briefly",
+              label: "3Blue1Brown / 大语言模型的简要解释",
               url: "https://www.bilibili.com/video/BV1xmA2eMEFF/",
               note: "这个比较短的视频涉及了很多内容却没有展开解释：预训练、强化学习、GPU、Transformer、Embedding、智能涌现等等，所以比较适合对 LLM 有了解后重新观看。"
             },
@@ -66,24 +73,19 @@ export const roadmap = {
       summary: "完成第一次真正有用的 AI 使用：打开任意一个工具，提出一个具体问题，得到一个可以继续加工的回答。",
       groups: [
         {
-          title: "海外",
+          title: "推荐工具",
           description: "排名不分先后，都是“自研模型 + 自家应用”。先不用管复杂提示词，问任何想问的内容，用起来再说。",
           resources: [
-            { label: "OpenAI / ChatGPT", url: "https://chatgpt.com/" },
-            { label: "Anthropic / Claude", url: "https://claude.ai/" },
-            { label: "Google / Gemini", url: "https://gemini.google.com/" },
-            { label: "xAI / Grok", url: "https://grok.com/" }
-          ]
-        },
-        {
-          title: "国内",
-          resources: [
-            { label: "DeepSeek / Chat", url: "https://chat.deepseek.com/" },
-            { label: "字节跳动 / 豆包", url: "https://www.doubao.com/" },
-            { label: "阿里云 / 千问", url: "https://tongyi.aliyun.com/" },
-            { label: "腾讯 / 元宝", url: "https://yuanbao.tencent.com/" },
-            { label: "Moonshot AI / Kimi", url: "https://kimi.moonshot.cn/" },
-            { label: "智谱 / ChatGLM", url: "https://chatglm.cn/" }
+            { label: "ChatGPT", url: "https://chatgpt.com/" },
+            { label: "Claude", url: "https://claude.ai/" },
+            { label: "Gemini", url: "https://gemini.google.com/" },
+            { label: "Grok", url: "https://grok.com/" },
+            { label: "DeepSeek", url: "https://chat.deepseek.com/" },
+            { label: "豆包", url: "https://www.doubao.com/" },
+            { label: "千问", url: "https://tongyi.aliyun.com/" },
+            { label: "元宝", url: "https://yuanbao.tencent.com/" },
+            { label: "Kimi", url: "https://kimi.moonshot.cn/" },
+            { label: "ChatGLM", url: "https://chatglm.cn/" }
           ]
         },
         {
@@ -140,7 +142,14 @@ export const roadmap = {
             {
               title: "Web Search",
               description: "联网搜索是目前 AI 产品标配的功能，适合快速查找资料、补充事实和做基础核验。",
-              items: ["Perplexity", "秘塔 AI 搜索", "Felo", "Elicit", "SciSpace", "Consensus"]
+              resources: [
+                { label: "Perplexity", url: "https://www.perplexity.ai/" },
+                { label: "秘塔 AI 搜索", url: "https://metaso.cn/" },
+                { label: "Felo", url: "https://felo.ai/" },
+                { label: "Elicit", url: "https://elicit.com/" },
+                { label: "SciSpace", url: "https://scispace.com/" },
+                { label: "Consensus", url: "https://consensus.app/" }
+              ]
             }
           ]
         },
@@ -162,15 +171,17 @@ export const roadmap = {
               ]
             },
             {
-              title: "页面",
+              title: "网页",
               description: "最简单的是直接把链接发给 AI，让它阅读网页；更进一步可以尝试 AI 浏览器，用来浏览公开网页会很有帮助。",
+              toolResources: [
+                { label: "Atlas", url: "https://chatgpt.com/zh-Hant-HK/atlas/" },
+                { label: "豆包浏览器", url: "https://www.doubao.com/" },
+                { label: "夸克浏览器", url: "https://www.quark.cn/" },
+                { label: "Dia", url: "https://www.diabrowser.com/" },
+                { label: "Comet", url: "https://www.perplexity.ai/comet" },
+                { label: "Tabbit", url: "https://www.tabbitbrowser.com/" }
+              ],
               resources: [
-                { label: "OpenAI / Atlas", url: "https://chatgpt.com/zh-Hant-HK/atlas/" },
-                { label: "字节跳动 / 豆包浏览器", url: "https://www.doubao.com/" },
-                { label: "夸克 / 夸克浏览器", url: "https://www.quark.cn/" },
-                { label: "The Browser Company / Dia", url: "https://www.diabrowser.com/" },
-                { label: "Perplexity / Comet", url: "https://www.perplexity.ai/comet" },
-                { label: "Tabbit / AI Browser", url: "https://www.tabbitbrowser.com/" },
                 {
                   label: "檀东东Tango / AI 搜索浏览器教程",
                   url: "https://www.bilibili.com/video/BV1vmcdeGEVw/",
@@ -212,28 +223,20 @@ export const roadmap = {
             {
               title: "音频",
               description: "一类是传统 pipeline：语音转文字再转语音；另一类是原生多模态语音，能直接理解语音并感知语气语速。",
-              resources: [
-                { label: "阿里云 / 通义听悟", url: "https://tingwu.aliyun.com/" },
-                { label: "飞书 / 妙记", url: "https://www.feishu.cn/product/minutes" },
-                { label: "字节跳动 / 豆包输入法", url: "https://shurufa.doubao.com/" },
-                { label: "腾讯 / 微信输入法", url: "https://z.weixin.qq.com/" },
-                { label: "Typeless / Voice Typing", url: "https://www.typeless.com/" }
+              toolResources: [
+                { label: "通义听悟", url: "https://tingwu.aliyun.com/" },
+                { label: "飞书妙记", url: "https://www.feishu.cn/product/minutes" },
+                { label: "豆包输入法", url: "https://shurufa.doubao.com/" },
+                { label: "微信输入法", url: "https://z.weixin.qq.com/" },
+                { label: "Typeless", url: "https://www.typeless.com/" }
               ]
             },
             {
               title: "视频",
               description: "视频理解大概有四种实现方式：获取字幕、音频转文字、视频抽帧理解、原生视频理解。前两种还是理解文字，第三种是理解图片，第四种才更接近真正理解视频。",
-              resources: [
-                {
-                  label: "Google / Gemini",
-                  url: "https://gemini.google.com/",
-                  note: "目前在视频理解领域体验最好的工具之一，处理速度快且理解准确，强烈推荐首选。"
-                },
-                {
-                  label: "MiniMax / Text M3",
-                  url: "https://www.minimaxi.com/models/text/m3",
-                  note: "国内支持原生多模态的模型代表。虽然处理速度相对稍慢，但同样能准确识别视频画面与动态内容，值得一试。"
-                }
+              toolResources: [
+                { label: "Gemini", url: "https://gemini.google.com/" },
+                { label: "Text M3", url: "https://www.minimaxi.com/models/text/m3" }
               ]
             }
           ]
@@ -273,11 +276,6 @@ export const roadmap = {
                   label: "JeffSu杰夫 / NotebookLM 完整操作指南",
                   url: "https://www.bilibili.com/video/BV1AFATz7EsD/",
                   note: "由 Google 官方前营销经理出品，视频质量很高，涵盖了 NotebookLM 核心功能演示和非常真实的个人使用经验。"
-                },
-                {
-                  label: "腾讯 / ima",
-                  url: "https://ima.qq.com/",
-                  note: "同类型工具，可以自行体验它的知识库与智能写作功能。"
                 }
               ]
             },
@@ -294,10 +292,12 @@ export const roadmap = {
                   label: "IBM Technology / Is RAG Still Needed?",
                   url: "https://www.youtube.com/watch?v=UabBYexBD4k",
                   note: "可以配合上一条一起看。它讲清楚了什么时候该用 RAG，什么时候不需要用，能帮助你更好做技术决策。"
-                },
-                { label: "Dify / AI App Platform", url: "https://dify.ai/" },
-                { label: "FastGPT / Knowledge Base AI", url: "https://fastgpt.in/" },
-                { label: "RAGFlow / Open-source RAG Engine", url: "https://ragflow.io/" }
+                }
+              ],
+              toolResources: [
+                { label: "Dify", url: "https://dify.ai/" },
+                { label: "FastGPT", url: "https://fastgpt.in/" },
+                { label: "RAGFlow", url: "https://ragflow.io/" }
               ]
             }
           ]

@@ -11,6 +11,7 @@ type Group = {
   title: string;
   description?: string | string[];
   items?: string[];
+  toolResources?: Resource[];
   resources?: Resource[];
 };
 
@@ -30,12 +31,13 @@ type Stage = {
 const { stage } = Astro.props as {
   stage: Stage;
 };
+
+const groupCount = stage.groups?.length ?? 0;
 ---
 
 <div class="stage-groups">
   {Boolean(stage.subtopics?.length) && (
     <section class="group-card capability-card">
-      <h2>能力模块</h2>
       <div class="capability-grid">
         {stage.subtopics?.map((topic) => (
           <button
@@ -52,12 +54,13 @@ const { stage } = Astro.props as {
     </section>
   )}
 
-  {stage.groups?.map((group: Group, index: number) => {
-    const resourcePanelId = `${stage.id || "stage"}-${index}-resources`;
-
-    return (
-    <section class="group-card">
-      <h2>{group.title}</h2>
+  {stage.groups?.map((group: Group) => (
+    <section class={`group-card ${group.resources || group.toolResources ? "resource-group-card" : ""}`}>
+      {(!(group.resources || group.toolResources) || groupCount > 1) && (
+        <div class="group-card-heading">
+          <h2>{group.title}</h2>
+        </div>
+      )}
       {group.description && (
         <div class="group-description">
           {(Array.isArray(group.description) ? group.description : [group.description]).map((paragraph) => (
@@ -70,106 +73,16 @@ const { stage } = Astro.props as {
           {group.items.map((item: string) => <span>{item}</span>)}
         </div>
       )}
+      {group.toolResources && (
+        <div class="resource-panel is-compact">
+          <ResourceList resources={group.toolResources} />
+        </div>
+      )}
       {group.resources && (
-        <details class="resource-details" id={resourcePanelId}>
-          <summary>
-            {group.resources.length} 个资源
-          </summary>
-          <div class="resource-reveal">
-            <ResourceList resources={group.resources} />
-          </div>
-        </details>
+        <div class:list={["resource-panel", { "is-compact": group.resources.length > 1 && group.resources.every((resource) => !resource.note) }]}>
+          <ResourceList resources={group.resources} />
+        </div>
       )}
     </section>
-    );
-  })}
+  ))}
 </div>
-
-<script>
-  const setupResourceDetails = () => {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const animationOptions: KeyframeAnimationOptions = {
-      duration: 300,
-      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-      fill: "forwards"
-    };
-
-    const finishAnimation = (details: HTMLDetailsElement, reveal: HTMLElement) => {
-      details.classList.remove("is-animating", "is-closing");
-      reveal.style.height = "";
-      reveal.style.opacity = "";
-      reveal.style.transform = "";
-    };
-
-    const playRevealAnimation = (
-      reveal: HTMLElement,
-      keyframes: Keyframe[],
-      onFinish: () => void
-    ) => {
-      const animation = reveal.animate(keyframes, animationOptions);
-      window.setTimeout(() => {
-        onFinish();
-        animation.cancel();
-      }, Number(animationOptions.duration));
-    };
-
-    document.querySelectorAll(".resource-details").forEach((detailsElement) => {
-      const details = detailsElement as HTMLDetailsElement;
-      const summary = details.querySelector("summary");
-      const reveal = details.querySelector(".resource-reveal") as HTMLElement | null;
-
-      if (!summary || !reveal || details.dataset.enhanced === "true") {
-        return;
-      }
-
-      details.dataset.enhanced = "true";
-
-      summary.addEventListener("click", (event) => {
-        event.preventDefault();
-
-        if (reduceMotion.matches) {
-          details.open = !details.open;
-          return;
-        }
-
-        if (details.classList.contains("is-animating")) {
-          return;
-        }
-
-        details.classList.add("is-animating");
-
-        if (!details.open) {
-          details.open = true;
-          playRevealAnimation(
-            reveal,
-            [
-              { height: "0px", opacity: 0, transform: "translateY(-4px)" },
-              { height: `${reveal.scrollHeight}px`, opacity: 1, transform: "translateY(0)" }
-            ],
-            () => finishAnimation(details, reveal)
-          );
-          return;
-        }
-
-        details.classList.add("is-closing");
-        playRevealAnimation(
-          reveal,
-          [
-            { height: `${reveal.scrollHeight}px`, opacity: 1, transform: "translateY(0)" },
-            { height: "0px", opacity: 0, transform: "translateY(-4px)" }
-          ],
-          () => {
-            details.open = false;
-            finishAnimation(details, reveal);
-          }
-        );
-      });
-    });
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setupResourceDetails, { once: true });
-  } else {
-    setupResourceDetails();
-  }
-</script>

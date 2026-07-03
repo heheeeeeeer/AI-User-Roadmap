@@ -20,7 +20,9 @@ const { roadmap } = Astro.props as {
   <div class="product-workspace" id="top">
     <section class="roadmap-board" aria-label={roadmap.title}>
       <div class="roadmap-title">
-        <h1>{roadmap.title}</h1>
+        <div class="roadmap-title-copy">
+          <h1>{roadmap.title}</h1>
+        </div>
       </div>
 
       <div class="roadmap-flow">
@@ -59,6 +61,7 @@ const { roadmap } = Astro.props as {
     title: string;
     description?: string | string[];
     items?: string[];
+    toolResources?: Resource[];
     resources?: Resource[];
   };
 
@@ -81,7 +84,6 @@ const { roadmap } = Astro.props as {
 
   const setupStagePanels = () => {
     const PANEL_DATA_URL = "/roadmap-data.json";
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mobileQuery = window.matchMedia("(max-width: 900px)");
     const overlay = document.querySelector<HTMLButtonElement>("[data-intro-close-overlay]");
     const workspace = document.querySelector<HTMLElement>(".product-workspace");
@@ -112,6 +114,24 @@ const { roadmap } = Astro.props as {
       return element;
     };
 
+    const createLinkedParagraph = (text: string) => {
+      const paragraph = createElement("p");
+      const contactEmail = "heheer@zju.edu.cn";
+      const parts = text.split(contactEmail);
+
+      parts.forEach((part, index) => {
+        if (part) paragraph.append(document.createTextNode(part));
+        if (index < parts.length - 1) {
+          const link = document.createElement("a");
+          link.href = `mailto:${contactEmail}`;
+          link.textContent = contactEmail;
+          paragraph.append(link);
+        }
+      });
+
+      return paragraph;
+    };
+
     const createSvg = (pathValue: string, className?: string) => {
       const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       if (className) svg.setAttribute("class", className);
@@ -123,93 +143,43 @@ const { roadmap } = Astro.props as {
       return svg;
     };
 
-    const finishResourceAnimation = (details: HTMLDetailsElement, reveal: HTMLElement) => {
-      details.classList.remove("is-animating", "is-closing");
-      reveal.style.height = "";
-      reveal.style.opacity = "";
-      reveal.style.transform = "";
-    };
+    const splitResourceLabel = (label: string) => {
+      const separator = " / ";
 
-    const playRevealAnimation = (
-      reveal: HTMLElement,
-      keyframes: Keyframe[],
-      onFinish: () => void
-    ) => {
-      const animation = reveal.animate(keyframes, {
-        duration: 300,
-        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        fill: "forwards"
-      });
+      if (!label.includes(separator)) {
+        return { title: label };
+      }
 
-      window.setTimeout(() => {
-        onFinish();
-        animation.cancel();
-      }, 300);
-    };
+      const [source, ...titleParts] = label.split(separator);
+      const title = titleParts.join(separator).trim();
 
-    const enhanceResourceDetails = (root: ParentNode) => {
-      root.querySelectorAll(".resource-details").forEach((detailsElement) => {
-        const details = detailsElement as HTMLDetailsElement;
-        const summary = details.querySelector("summary");
-        const reveal = details.querySelector(".resource-reveal") as HTMLElement | null;
+      if (!title) {
+        return { title: label };
+      }
 
-        if (!summary || !reveal || details.dataset.enhanced === "true") {
-          return;
-        }
-
-        details.dataset.enhanced = "true";
-
-        summary.addEventListener("click", (event) => {
-          event.preventDefault();
-
-          if (reduceMotion.matches) {
-            details.open = !details.open;
-            return;
-          }
-
-          if (details.classList.contains("is-animating")) {
-            return;
-          }
-
-          details.classList.add("is-animating");
-
-          if (!details.open) {
-            details.open = true;
-            playRevealAnimation(
-              reveal,
-              [
-                { height: "0px", opacity: 0, transform: "translateY(-4px)" },
-                { height: `${reveal.scrollHeight}px`, opacity: 1, transform: "translateY(0)" }
-              ],
-              () => finishResourceAnimation(details, reveal)
-            );
-            return;
-          }
-
-          details.classList.add("is-closing");
-          playRevealAnimation(
-            reveal,
-            [
-              { height: `${reveal.scrollHeight}px`, opacity: 1, transform: "translateY(0)" },
-              { height: "0px", opacity: 0, transform: "translateY(-4px)" }
-            ],
-            () => {
-              details.open = false;
-              finishResourceAnimation(details, reveal);
-            }
-          );
-        });
-      });
+      return {
+        source: source.trim(),
+        title
+      };
     };
 
     const renderResourceList = (resources: Resource[]) => {
       const list = createElement("ul", "resource-list");
+      const isCompactToolList = resources.length > 1 && resources.every((resource) => !resource.note);
+
+      if (isCompactToolList) {
+        list.classList.add("resource-list-compact");
+      }
 
       resources.forEach((resource) => {
         const listItem = document.createElement("li");
         const safeUrl = getSafeExternalUrl(resource.url);
+        const resourceLabel = splitResourceLabel(resource.label);
         const content = createElement("span", "resource-link-content");
-        content.append(createElement("span", "resource-link-title", resource.label));
+        content.append(createElement("span", "resource-link-title", resourceLabel.title));
+        if (resourceLabel.source) {
+          content.append(createElement("span", "resource-link-source", resourceLabel.source));
+        }
         if (resource.note) {
           content.append(createElement("span", "resource-link-note", resource.note));
         }
@@ -238,8 +208,6 @@ const { roadmap } = Astro.props as {
 
       if (panelData.subtopics?.length) {
         const capabilityCard = createElement("section", "group-card capability-card");
-        capabilityCard.append(createElement("h2", undefined, "能力模块"));
-
         const capabilityGrid = createElement("div", "capability-grid");
         panelData.subtopics.forEach((topic) => {
           const button = createElement("button", `capability-button tone-${topic.color || "green"}`) as HTMLButtonElement;
@@ -255,9 +223,17 @@ const { roadmap } = Astro.props as {
         stageGroups.append(capabilityCard);
       }
 
+      const groupCount = panelData.groups?.length ?? 0;
+
       panelData.groups?.forEach((group, index) => {
-        const groupCard = createElement("section", "group-card");
-        groupCard.append(createElement("h2", undefined, group.title));
+        const hasResources = Boolean(group.resources?.length || group.toolResources?.length);
+        const groupCard = createElement("section", `group-card ${hasResources ? "resource-group-card" : ""}`);
+
+        if (!hasResources || groupCount > 1) {
+          const heading = createElement("div", "group-card-heading");
+          heading.append(createElement("h2", undefined, group.title));
+          groupCard.append(heading);
+        }
 
         if (group.description) {
           const description = createElement("div", "group-description");
@@ -272,15 +248,21 @@ const { roadmap } = Astro.props as {
           groupCard.append(chipGrid);
         }
 
-        if (group.resources?.length) {
-          const details = createElement("details", "resource-details") as HTMLDetailsElement;
-          details.id = `${panelData.id || "stage"}-${index}-resources`;
-          details.append(createElement("summary", undefined, `${group.resources.length} 个资源`));
+        if (group.toolResources?.length) {
+          const toolPanel = createElement("div", "resource-panel is-compact");
+          toolPanel.id = `${panelData.id || "stage"}-${index}-tools`;
+          toolPanel.append(renderResourceList(group.toolResources));
+          groupCard.append(toolPanel);
+        }
 
-          const reveal = createElement("div", "resource-reveal");
-          reveal.append(renderResourceList(group.resources));
-          details.append(reveal);
-          groupCard.append(details);
+        if (group.resources?.length) {
+          const resourcePanel = createElement("div", "resource-panel");
+          if (group.resources.length > 1 && group.resources.every((resource) => !resource.note)) {
+            resourcePanel.classList.add("is-compact");
+          }
+          resourcePanel.id = `${panelData.id || "stage"}-${index}-resources`;
+          resourcePanel.append(renderResourceList(group.resources));
+          groupCard.append(resourcePanel);
         }
 
         stageGroups.append(groupCard);
@@ -291,6 +273,7 @@ const { roadmap } = Astro.props as {
 
     const renderPanel = (panelData: PanelData) => {
       const panel = createElement("section", "intro-popover");
+      if (panelData.sections?.length) panel.classList.add("is-article-panel");
       panel.id = panelData.id;
       panel.dataset.introPanel = "";
       panel.dataset.open = "false";
@@ -311,18 +294,17 @@ const { roadmap } = Astro.props as {
         body.append(overview);
       }
 
-      panelData.sections?.forEach((section, sectionIndex) => {
-        const sectionNode = createElement("section", "intro-section");
-        sectionNode.append(createElement("h2", undefined, section.title));
+      panelData.sections?.forEach((section) => {
+        const sectionNode = createElement("section", "intro-section intro-essay");
+        const heading = createElement("div", "intro-section-heading");
+        heading.append(createElement("h2", undefined, section.title));
+        sectionNode.append(heading);
 
-        section.paragraphs.forEach((paragraph, paragraphIndex) => {
-          const paragraphNode = createElement(
-            "p",
-            sectionIndex === 0 && paragraphIndex === 0 ? "intro-lead" : undefined,
-            paragraph
-          );
-          sectionNode.append(paragraphNode);
+        const paragraphStack = createElement("div", "intro-paragraph-stack");
+        section.paragraphs.forEach((paragraph) => {
+          paragraphStack.append(createLinkedParagraph(paragraph));
         });
+        sectionNode.append(paragraphStack);
 
         body.append(sectionNode);
       });
@@ -332,7 +314,6 @@ const { roadmap } = Astro.props as {
       }
 
       panel.append(closeButton, body);
-      enhanceResourceDetails(panel);
       return panel;
     };
 

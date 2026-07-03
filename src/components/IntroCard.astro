@@ -34,9 +34,19 @@ const { id, title, summary, sections = [], groups = [], subtopics = [], defaultO
   subtopics?: Subtopic[];
   defaultOpen?: boolean;
 };
+
+const isArticlePanel = sections.length > 0;
+const contactEmail = "heheer@zju.edu.cn";
+const renderParagraphParts = (paragraph: string) =>
+  paragraph.split(contactEmail).flatMap((part, index, parts) => {
+    const nodes: Array<{ type: "text" | "email"; text: string }> = [];
+    if (part) nodes.push({ type: "text", text: part });
+    if (index < parts.length - 1) nodes.push({ type: "email", text: contactEmail });
+    return nodes;
+  });
 ---
 
-<section class={`intro-popover ${defaultOpen ? "is-open" : ""}`} id={id} data-intro-panel data-open={String(defaultOpen)} aria-hidden={!defaultOpen}>
+<section class={`intro-popover ${isArticlePanel ? "is-article-panel" : ""} ${defaultOpen ? "is-open" : ""}`} id={id} data-intro-panel data-open={String(defaultOpen)} aria-hidden={!defaultOpen}>
   <button class="intro-popover-close" type="button" aria-label="收起详情侧边栏" data-intro-close>
     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></svg>
   </button>
@@ -49,14 +59,20 @@ const { id, title, summary, sections = [], groups = [], subtopics = [], defaultO
       </section>
     )}
 
-    {sections.map((section, sectionIndex) => (
-      <section class="intro-section">
-        <h2>{section.title}</h2>
-        {section.paragraphs.map((paragraph, paragraphIndex) => (
-          <p class={sectionIndex === 0 && paragraphIndex === 0 ? "intro-lead" : ""}>
-            {paragraph}
-          </p>
-        ))}
+    {sections.map((section) => (
+      <section class="intro-section intro-essay">
+        <div class="intro-section-heading">
+          <h2>{section.title}</h2>
+        </div>
+        <div class="intro-paragraph-stack">
+          {section.paragraphs.map((paragraph) => (
+            <p>
+              {renderParagraphParts(paragraph).map((part) =>
+                part.type === "email" ? <a href={`mailto:${part.text}`}>{part.text}</a> : part.text
+              )}
+            </p>
+          ))}
+        </div>
       </section>
     ))}
 
