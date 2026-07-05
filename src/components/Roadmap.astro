@@ -71,8 +71,14 @@ const { roadmap } = Astro.props as {
     color?: string;
   };
 
+  type PanelParent = {
+    id: string;
+    title: string;
+  };
+
   type PanelData = {
     id: string;
+    parent?: PanelParent;
     title?: string;
     summary?: string;
     sections?: IntroSection[];
@@ -277,6 +283,7 @@ const { roadmap } = Astro.props as {
       panel.id = panelData.id;
       panel.dataset.introPanel = "";
       panel.dataset.open = "false";
+      if (panelData.parent) panel.dataset.parentPanelId = panelData.parent.id;
       panel.setAttribute("aria-hidden", "true");
 
       const closeButton = createElement("button", "intro-popover-close") as HTMLButtonElement;
@@ -286,6 +293,18 @@ const { roadmap } = Astro.props as {
       closeButton.append(createSvg("m6 6 12 12M18 6 6 18"));
 
       const body = createElement("div", "intro-popover-body");
+
+      if (panelData.parent) {
+        const backButton = createElement("button", "panel-back-button") as HTMLButtonElement;
+        backButton.type = "button";
+        backButton.dataset.introBack = "";
+        backButton.setAttribute("aria-controls", panelData.parent.id);
+        backButton.setAttribute("aria-label", `返回${panelData.parent.title}`);
+        const arrow = createElement("span", "panel-back-arrow", "‹");
+        arrow.setAttribute("aria-hidden", "true");
+        backButton.append(arrow, createElement("span", undefined, panelData.parent.title));
+        body.append(backButton);
+      }
 
       if (panelData.title || panelData.summary) {
         const overview = createElement("section", "intro-section intro-overview");
@@ -385,28 +404,23 @@ const { roadmap } = Astro.props as {
       if (restoreFocus) activeTrigger?.focus({ preventScroll: true });
     };
 
-    const openPanel = async (trigger: HTMLButtonElement) => {
-      const panelId = trigger.getAttribute("aria-controls");
-      const alreadyOpen = trigger.getAttribute("aria-expanded") === "true";
-
-      if (alreadyOpen) {
-        closeAll(false);
-        return;
-      }
-
-      if (!panelId) return;
-
-      trigger.dataset.loading = "true";
+    const openPanelById = async (panelId: string, activeTrigger?: HTMLButtonElement | null) => {
+      activeTrigger?.setAttribute("data-loading", "true");
       const panel = await ensurePanel(panelId);
-      delete trigger.dataset.loading;
+      activeTrigger?.removeAttribute("data-loading");
       if (!panel) return;
 
       closeAll(false);
       panel.dataset.open = "true";
       panel.classList.add("is-open");
       panel.setAttribute("aria-hidden", "false");
-      trigger.setAttribute("aria-expanded", "true");
-      trigger.closest(".island-stage")?.classList.add("is-active");
+
+      const stagePanelId = panel.dataset.parentPanelId || panelId;
+      const stageTrigger = getTriggers().find((candidate) => candidate.getAttribute("aria-controls") === stagePanelId);
+      stageTrigger?.setAttribute("aria-expanded", "true");
+      stageTrigger?.closest(".island-stage")?.classList.add("is-active");
+      activeTrigger?.setAttribute("aria-expanded", "true");
+
       workspace?.classList.add("is-detail-open");
       panel.querySelector<HTMLElement>(".intro-popover-body")?.scrollTo({ top: 0 });
 
@@ -418,8 +432,29 @@ const { roadmap } = Astro.props as {
       }
     };
 
+    const openPanel = async (trigger: HTMLButtonElement) => {
+      const panelId = trigger.getAttribute("aria-controls");
+      const alreadyOpen = trigger.getAttribute("aria-expanded") === "true";
+
+      if (alreadyOpen) {
+        closeAll(false);
+        return;
+      }
+
+      if (!panelId) return;
+
+      await openPanelById(panelId, trigger);
+    };
+
     document.addEventListener("click", (event) => {
       const target = event.target as HTMLElement | null;
+      const backButton = target?.closest<HTMLButtonElement>("[data-intro-back]");
+      if (backButton) {
+        const panelId = backButton.getAttribute("aria-controls");
+        if (panelId) void openPanelById(panelId, null);
+        return;
+      }
+
       const trigger = target?.closest<HTMLButtonElement>("[data-intro-trigger]");
       if (trigger) {
         void openPanel(trigger);

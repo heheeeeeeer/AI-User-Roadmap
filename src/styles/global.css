@@ -61,6 +61,7 @@ a {
 }
 
 .page-shell {
+  --shell-inline: 28px;
   width: min(1480px, 100%);
   min-height: 100vh;
   margin: 0 auto;
@@ -68,6 +69,9 @@ a {
 }
 
 .product-workspace {
+  --detail-dock-gap: 16px;
+  --detail-dock-inset: 18px;
+  --detail-dock-width: clamp(410px, 40vw, 520px);
   display: flex;
   align-items: flex-start;
   gap: 0;
@@ -107,11 +111,31 @@ a {
 }
 
 .product-workspace.is-detail-open .detail-dock {
-  flex: 0 0 clamp(410px, 40vw, 520px);
-  width: clamp(410px, 40vw, 520px);
-  margin-left: 16px;
+  flex: 0 0 var(--detail-dock-width);
+  width: var(--detail-dock-width);
+  margin-left: var(--detail-dock-gap);
   opacity: 1;
   visibility: visible;
+}
+
+@media (min-width: 901px) {
+  .product-workspace.is-detail-open::after {
+    content: "";
+    flex: 0 0 var(--detail-dock-width);
+    width: var(--detail-dock-width);
+    margin-left: var(--detail-dock-gap);
+    pointer-events: none;
+  }
+
+  .product-workspace.is-detail-open .detail-dock {
+    position: fixed;
+    top: var(--detail-dock-inset);
+    right: max(var(--shell-inline), calc((100vw - 1480px) / 2 + var(--shell-inline)));
+    z-index: 20;
+    height: calc(100dvh - (var(--detail-dock-inset) * 2));
+    max-height: calc(100dvh - (var(--detail-dock-inset) * 2));
+    margin-left: 0;
+  }
 }
 
 .roadmap-title {
@@ -547,12 +571,58 @@ a {
   stroke-linecap: round;
 }
 
+.panel-back-button {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: max-content;
+  min-height: 28px;
+  margin: -4px 0 -10px;
+  padding: 3px 8px 3px 2px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: color-mix(in srgb, var(--green-deep) 82%, #8f927f);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 640;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.panel-back-button:hover {
+  background: rgb(127 164 108 / 8%);
+  color: var(--green-deep);
+  transform: translateX(-1px);
+}
+
+.panel-back-button:focus-visible {
+  outline: 3px solid rgb(47 191 103 / 18%);
+  outline-offset: 2px;
+}
+
+.panel-back-arrow {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 0.75;
+  transform: translateY(-1px);
+  transition: transform 160ms ease;
+}
+
+.panel-back-button:hover .panel-back-arrow {
+  transform: translate(-2px, -1px);
+}
+
 .intro-popover-body {
   display: grid;
   align-content: start;
   gap: 24px;
   height: 100%;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   padding: 62px 30px 44px;
   scrollbar-width: thin;
@@ -566,6 +636,7 @@ a {
 .intro-section {
   display: grid;
   gap: 12px;
+  min-width: 0;
 }
 
 .intro-section h2 {
@@ -575,12 +646,19 @@ a {
   font-weight: 660;
   line-height: 1.35;
   letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .intro-overview {
   gap: 10px;
+  min-width: 0;
   padding: 0 52px 22px 0;
   border-bottom: 1px solid rgb(226 220 208 / 78%);
+}
+
+.intro-overview > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .intro-overview h2 {
@@ -596,6 +674,7 @@ a {
   color: #516058;
   font-size: 14px;
   line-height: 1.92;
+  overflow-wrap: anywhere;
 }
 
 .intro-section .intro-lead {
@@ -668,6 +747,7 @@ a {
 
 .group-card {
   width: 100%;
+  min-width: 0;
   padding: 17px;
   border: 1px solid rgb(226 220 208 / 82%);
   border-radius: 20px;
@@ -914,6 +994,7 @@ a {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  min-width: 0;
   min-height: 74px;
   overflow: hidden;
   padding: 18px 20px 18px 22px;
@@ -977,6 +1058,7 @@ a {
   font-size: 14px;
   font-weight: 720;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .resource-panel.is-compact .resource-link-title {
@@ -1010,6 +1092,7 @@ a {
   font-size: 13px;
   font-weight: 440;
   line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 .resource-list svg {
@@ -1054,10 +1137,12 @@ a {
 }
 
 @media (max-width: 1120px) and (min-width: 901px) {
-  .page-shell { padding-inline: 12px; }
-  .product-workspace.is-detail-open .roadmap-board { flex: 1 1 500px; }
-  .product-workspace.is-detail-open .detail-dock { flex: 0 0 clamp(500px, 54vw, 560px); width: clamp(500px, 54vw, 560px); margin-left: 10px; }
+  .page-shell { --shell-inline: 12px; padding-inline: 12px; }
+  .product-workspace { --detail-dock-gap: 10px; --detail-dock-width: clamp(340px, 42vw, 460px); }
+  .product-workspace.is-detail-open .roadmap-board { flex: 1 1 460px; }
+  .product-workspace.is-detail-open .detail-dock { flex: 0 0 var(--detail-dock-width); width: var(--detail-dock-width); }
   .roadmap-board { padding-inline: 22px; }
+  .intro-overview { padding-right: 30px; }
   .roadmap-flow { width: min(560px, 100%); }
   .island-stage { grid-template-columns: minmax(210px, 1fr) minmax(206px, 220px); }
   .stage-action { --stage-connector-size: 44px; --stage-pill-width: 160px; }
@@ -1109,6 +1194,7 @@ a {
   .intro-popover.is-open { transform: translateY(0); }
   .intro-popover-body { padding: 58px max(20px, env(safe-area-inset-right)) max(34px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
   .intro-popover-close { top: max(15px, env(safe-area-inset-top)); right: max(15px, env(safe-area-inset-right)); }
+  .panel-back-button { min-height: 34px; margin-top: -8px; padding-right: 11px; }
   .intro-scrim { display: block; }
   body[data-intro-drawer-open="true"] .intro-scrim { opacity: 1; pointer-events: auto; }
 }

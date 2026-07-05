@@ -462,13 +462,8 @@ export const roadmap = {
       groups: [
         {
           title: "什么是 Agent？",
-          description: "如果说普通的 AI 像是一个坐在房间里、只能通过屏幕和你打字聊天的智者，那 Agent 就相当于给这个智者配上了手脚、工具和备忘录，并允许他走出去替你干活。",
           resources: [
-            {
-              label: "技术爬爬虾 / Codex App 保姆级全攻略",
-              url: "https://www.bilibili.com/video/BV1Kk9kBAEJv",
-              note: "一份非常详细的 Codex 教程。虽然由于 Codex 更新很快，部分界面可能不太一样了，但用来了解 Agent 能力依然非常有价值。"
-            },
+
             {
               label: "赫赫儿 / Agent是怎么跑起来的? 从零拆解Agent核心运行机制!",
               url: "https://www.douyin.com/user/MS4wLjABAAAAsIs0bWWViQOm7ksfM9zzmVe_mDaSXfH-3OGH0qvRXp2NOEbmQRmGUcTdMGJNT8F7?modal_id=7634148231470943530",
@@ -480,9 +475,14 @@ export const roadmap = {
               note: "十分钟把 OpenClaw 讲明白，包括它相比以前的 Coding Agent 做了哪些额外改进，以及可能存在的安全问题。"
             },
             {
+              label: "绿导师原谅你了 / 04 (Aside) - LLM, Agents 和 Scaling Law",
+              url: "https://www.bilibili.com/video/BV1gEcmzzE4P?spm_id_from=333.788.videopod.sections&vd_source=611f1c6701469d82272fd49ca9b9f7d2",
+              note: "很连贯地讲解了 LLM -> Agent 以及背后的 Scaling Law，jyy 老师的课果然不让人失望，虽然由于是大学课程会有点散，容易犯困，但是分几次看完后也能有很深入的理解。还有这个系列的最后一节课也值得推荐，最后一部分令人热泪盈眶。"
+            },
+            {
               label: "Treap要赚一个亿U-Acc / 万字拆解AI Agent编年史",
               url: "https://www.bilibili.com/video/BV1NL9tBsELS/?spm_id_from=333.337.search-card.all.click&vd_source=611f1c6701469d82272fd49ca9b9f7d2",
-              note: "视频有点长但是不水，能感受到作者的思考过程，对于五代演进的划分可以作为参考，不一定完全准确。"
+              note: "整个视频能感受到作者的思考过程，编年史的形式也很有趣味性，虽然对于五代演进的划分不一定完全准确，但是可以作为一些阅读补充与参考。"
             }
           ]
         },
@@ -504,17 +504,16 @@ export const roadmap = {
         },
         {
           title: "与 Agent 协作",
-          description: "如果你不懂原理，你连 AI 写的代码都不敢提交。在 AI 时代，学习依然重要，不要做放弃思考的搬运工，要努力提升自己，因为人机协作的上限，取决于你的上限。",
           resources: [
+            {
+              label: "技术爬爬虾 / Codex App 保姆级全攻略",
+              url: "https://www.bilibili.com/video/BV1Kk9kBAEJv",
+              note: "一份非常详细的 Codex 教程，尽管软件已经更新了好几轮，页面出现了不少变化，但是与 Agent 协作的方法可以应用到各个不同的 Agent 上。"
+            },
             {
               label: "五道口纳什 / 人机协作的视角，AI 时代的学习指南与焦虑缓解",
               url: "https://www.bilibili.com/video/BV12nw4z6Eoa/?spm_id_from=333.337.search-card.all.click&vd_source=611f1c6701469d82272fd49ca9b9f7d2",
-              note: "非常有见地的思考，可以作为与 Agent 协作的心法。如果放弃自己的思考，结果就是被 AI 吞噬；而在和 AI 的交互中不断提升自己，这样的上限是无限的。"
-            },
-            {
-              label: "绿导师原谅你了 / 04 (Aside) - LLM, Agents 和 Scaling Law",
-              url: "https://www.bilibili.com/video/BV1gEcmzzE4P?spm_id_from=333.788.videopod.sections&vd_source=611f1c6701469d82272fd49ca9b9f7d2",
-              note: "大名鼎鼎的 jyy 老师出的最新的绝版真人操作系统课。对于 AI 的讲解部分很有价值，可以顺带看看最后一节课的最后一部分，有着 jyy 老师的展望，总是令人热泪盈眶。"
+              note: "非常有见地的思考，可以作为与 Agent 协作的心法。如果放弃自己的思考，结果就是被 AI 吞噬；而在和 AI 的交互中不断提升自己，这样的上限才是无限的。"
             }
           ]
         }

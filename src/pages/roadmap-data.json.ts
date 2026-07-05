@@ -15,7 +15,13 @@ type Group = {
   title: string;
   description?: string | string[];
   items?: string[];
+  toolResources?: Resource[];
   resources?: Resource[];
+};
+
+type PanelParent = {
+  id: string;
+  title: string;
 };
 
 type Subtopic = {
@@ -46,6 +52,10 @@ const drawerStages = roadmap.stages.flatMap((stage: Stage, index: number) => [
   },
   ...((stage.subtopics || []).map((subtopic) => ({
     id: `intro-panel-${subtopic.id}`,
+    parent: {
+      id: `intro-panel-${stage.id || index}`,
+      title: stage.title
+    } satisfies PanelParent,
     title: subtopic.title,
     summary: subtopic.summary,
     sections: [],
