@@ -2,6 +2,268 @@
 
 每次修改本项目后，都需要在这里追加记录。下一次修改前必须先阅读本文件，并确认上一条记录里的回归检查点没有复现。
 
+## 2026-07-06（修复最后一张浮岛底部渐隐）
+
+### 改动摘要
+
+- 检查 `public/assets/islands/roadmap/island-05.png` 后确认原始图片本身是完整的，网页上底部发虚是统一图片 mask 的底部渐隐导致。
+- 针对最后一个浮岛 `.island-stage.is-last` 单独覆盖图片 mask，保留左右和顶部柔和融合，但取消底部渐隐，避免水池底部被虚化或看起来像图片不完整。
+
+### 影响文件
+
+- `src/styles/global.css`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+- 使用 Chrome headless 截取本地页面长视口截图，确认最后一张浮岛底部水池完整显示。
+
+### 下一次改动前需要防止复现
+
+- 不要把最后一张浮岛重新套回底部 97% 开始透明的统一 mask，否则水池底部会再次发虚。
+- 如果后续更换岛屿图片，需要同时检查图片主体是否过于靠近 canvas 边缘。
+
+## 2026-07-06（增加 README 品牌区和预览图）
+
+### 改动摘要
+
+- 参考 `labring/sealos` 的 README 信息组织方式，将 README 顶部改为居中品牌区：logo、标题、简介、徽章、快捷锚点导航和项目预览图。
+- 使用项目现有 favicon 作为 README logo。
+- 将用户提供的网页截图保存为 `public/assets/readme-preview.png`，并在 README 首屏展示。
+
+### 影响文件
+
+- `README.md`
+- `public/assets/readme-preview.png`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- 使用 `sed` 检查 README 顶部 HTML 与 Markdown 结构，确认 logo、badge、锚点和预览图引用路径正确。
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+- `git diff --check` 检查通过。
+
+### 下一次改动前需要防止复现
+
+- README 中的预览图路径应保持相对路径，确保 GitHub 页面可以直接渲染。
+- 如果后续重新生成截图，应避免截入调试工具、底部悬浮控件或浏览器 UI。
+- README 顶部可以增强视觉，但不要牺牲项目定位和内容贡献路径的清晰度。
+
+## 2026-07-06（README 优化）
+
+### 改动摘要
+
+- 为 `README.md` 的各个标题添加了生动恰当的 Emoji 图标（💡、🎯、🗺️、🤝、📄），使排版更显活泼亲切，降低阅读门槛。
+
+### 影响文件
+
+- `README.md`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- 检查了 Markdown 语法和效果，排版展示正常。
+
+### 下一次改动前需要防止复现
+
+- 无特殊要求。
+
+## 2026-07-06（增强数据 API 路由的类型安全）
+
+### 改动摘要
+
+- 检查了 `src/pages/roadmap-data.json.ts`。这是一个 Astro 的 API 路由（Endpoint），负责在构建时将庞大的 `roadmap.js` 数据扁平化，并生成最终被客户端 JS 请求的 `roadmap-data.json` 静态文件。
+- 将其中的 `Subtopic` 和 `Stage` 类型定义同样应用了 `ThemeColor` 强约束。
+- 修复了 `roadmap.stages` 在 `flatMap` 时的类型推断冲突，显式声明了 `(roadmap.stages as Stage[])`，消除了 TypeScript 的类型报错。
+
+### 影响文件
+
+- `src/pages/roadmap-data.json.ts`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过。
+
+### 下一次改动前需要防止复现
+
+- 无特殊要求。
+
+## 2026-07-06（深度清理全局 CSS 样式文件）
+
+### 改动摘要
+
+- 严格审查了 `src/styles/global.css` 文件。
+- 删除了与刚才废弃的子模块胶囊按钮相关的所有冗余 CSS 类，包括 `.subtopics-wrapper`、`.stage-connector.sub-connector`、`.subtopics-popover`、`.subtopics-grid`、`.subtopic-item`、`.subtopic-icon`、`.subtopic-title` 和 `.stage-pill.sub-pill`。
+- 同步清理了媒体查询（`@media`）中针对 `.subtopics-wrapper` 的显隐控制代码。
+- 精简了 `.stage-connector::before` 的伪类选择器（因为不需要再通过 `:not(.sub-connector)` 来排除了）。
+- 确认了 `global.css` 剩下的 `.is-article-panel`、`.group-card`、`.capability-button` 等样式，依然在被 `Roadmap.astro` 的原生 JavaScript DOM 渲染引擎严格使用，因此保留。
+
+### 影响文件
+
+- `src/styles/global.css`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过。
+
+### 下一次改动前需要防止复现
+
+- 无特殊要求。
+
+## 2026-07-06（增强 Roadmap.astro 颜色类型约束）
+
+### 改动摘要
+
+- 优化了 `src/components/Roadmap.astro` 中客户端 `<script>` 里的 TypeScript 类型定义。
+- 同样将 `Subtopic` 里的 `color?: string` 替换为了严格的联合类型 `ThemeColor = "gray" | "blue" | "green" | "amber" | "coral"`。
+- 保持了服务端组件（`IslandStage.astro`）与客户端渲染逻辑的类型约束一致性。
+
+### 影响文件
+
+- `src/components/Roadmap.astro`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过。
+
+### 下一次改动前需要防止复现
+
+- 无特殊要求。
+
+## 2026-07-06（简化主视觉：移除岛屿外挂的子模块胶囊按钮）
+
+### 改动摘要
+
+- 删除了 `src/components/IslandStage.astro` 中渲染外挂子模块按钮（`subtopics-wrapper`、`sub-pill` 等）的 DOM 代码。
+- 删除了对应的 SVG 图标生成函数 `getSubtopicIcon`。
+- 因为 `Roadmap.astro` 内部的侧边抽屉面板（Drawer）已经会在用户点击主阶段（如“核心场景”）时，在面板内部渲染这些 `subtopics`（以 `capability-card` 和 `capability-button` 的形式），所以在外部的主视觉岛屿上挂载这些小胶囊按钮不仅视觉冗余，而且会让岛屿显得过于拥挤。
+
+### 影响文件
+
+- `src/components/IslandStage.astro`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过。现在“核心场景”这个岛屿旁边不会再挂着一堆小按钮了，点击主按钮后依然能在右侧抽屉里看到所有的子场景选项。
+
+### 下一次改动前需要防止复现
+
+- 确认现在的“核心场景”入口链路是否符合用户预期，即：点击主岛屿 -> 弹出面板 -> 面板内展示所有子场景供用户选择。
+
+## 2026-07-06（增强 Stage 颜色类型约束）
+
+### 改动摘要
+
+- 优化了 `src/components/IslandStage.astro` 中的 TypeScript 类型定义。
+- 将原来宽泛的 `color?: string` 替换为了严格的联合类型 `ThemeColor = "gray" | "blue" | "green" | "amber" | "coral"`。
+- 这样能保证开发者在 `roadmap.js` 或组件中填写的颜色必须在预设的这 5 种主题色内，防止拼写错误导致样式（如 `tone-xxx`）不生效。
+
+### 影响文件
+
+- `src/components/IslandStage.astro`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors，确认类型收紧没有破坏现有数据。
+
+### 下一次改动前需要防止复现
+
+- 如果以后在 `global.css` 中新增了主题色（如 `.tone-purple`），需要同步来更新 `IslandStage.astro` 里的 `ThemeColor` 类型定义。
+
+## 2026-07-06（清理遗留的 Astro 静态详情组件）
+
+### 改动摘要
+
+- 删除了 `src/components/IntroCard.astro`、`src/components/StagePanel.astro` 和 `src/components/ResourceList.astro`。
+- 在 6 月 20 日“详情面板按需加载”的重构中，所有的详情面板渲染逻辑已经迁移到了 `Roadmap.astro` 的客户端 JavaScript 中（通过请求 `/roadmap-data.json` 并使用 DOM API 动态生成）。这三个静态组件在当时并未被同步删除，变成了无用的死代码（Dead Code）。
+
+### 影响文件
+
+- `src/components/IntroCard.astro` (已删除)
+- `src/components/StagePanel.astro` (已删除)
+- `src/components/ResourceList.astro` (已删除)
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints，确认删除不影响任何页面渲染。
+
+### 下一次改动前需要防止复现
+
+- 在进行架构级重构（例如从 SSR/SSG 渲染转为客户端按需渲染）时，务必全局搜索并清理不再被 import 的废弃组件。
+
+## 2026-07-06（清理冗余产物目录与未引用文件）
+
+### 改动摘要
+
+- 删除了 `output/` 目录及其内部的冗余图标设计稿草图（`stage-icons` 的预览与 v2 版本），这些图标在早期设计验证后并未实际接入，且正式图标已在 `public/assets/stage-icons/` 中。
+- 删除了 `public/favicon-512.png`，该文件与 `android-chrome-512x512.png` 是完全相同的重复文件，且在项目源码（`BaseLayout.astro` 或 `site.webmanifest`）中未被任何地方引用。
+
+### 影响文件
+
+- `output/` (已删除)
+- `public/favicon-512.png` (已删除)
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，确认删除该目录不影响 Astro 项目的构建与正式产物。
+
+### 下一次改动前需要防止复现
+
+- 避免在项目根目录下长期保留未使用或作为草稿的资源目录，以保持代码仓库的整洁。
+
+## 2026-07-06（清理冗余数据）
+
+### 改动摘要
+
+- 删除了 `src/data/roadmap.js` 中遗留的、未被使用的 `side: "left"` 与 `side: "right"` 属性，精简数据结构。
+- 删除了 `src/data/roadmap.js` 中遗留的、未被使用的 `drawer: true` 属性。该属性曾用于旧版的抽屉逻辑，但在最近的详情面板按需加载重构后已不再被任何组件（如 `Roadmap.astro` 或 `IslandStage.astro`）读取或使用。
+
+### 影响文件
+
+- `src/data/roadmap.js`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+
+### 下一次改动前需要防止复现
+
+- 维护数据文件时，避免再次引入与当前 UI（垂直浮岛路线）不相关的历史布局属性。
+
+## 2026-07-06（完善开源 README）
+
+### 改动摘要
+
+- 重写 `README.md`，补充项目定位、适合人群、当前内容阶段、本地运行方式、项目结构、内容贡献方式、开发约定和许可说明。
+- 将 README 从简单标题和许可声明扩展为面向开源读者与潜在贡献者的项目首页。
+- 明确核心内容文件为 `src/data/roadmap.js`，方便后续贡献者理解如何补充路线图资源。
+
+### 影响文件
+
+- `README.md`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+- `git diff --check` 检查通过。
+- 使用 `sed` 人工检查 README 渲染层级和 Markdown 结构，确认标题、列表、代码块和链接格式正常。
+
+### 下一次改动前需要防止复现
+
+- README 应继续保持对非开发读者友好，不要只写成工程启动说明。
+- 内容贡献路径要保持清晰，尤其是 `src/data/roadmap.js` 的入口说明。
+- 如果项目上线了稳定公开地址，应回到 README 增加在线预览链接和截图。
+
 ## 2026-07-05（修复窄桌面详情面板横向溢出）
 
 ### 改动摘要

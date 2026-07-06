@@ -65,10 +65,12 @@ const { roadmap } = Astro.props as {
     resources?: Resource[];
   };
 
+  type ThemeColor = "gray" | "blue" | "green" | "amber" | "coral";
+
   type Subtopic = {
     id: string;
     title: string;
-    color?: string;
+    color?: ThemeColor;
   };
 
   type PanelParent = {

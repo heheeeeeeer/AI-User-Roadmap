@@ -24,10 +24,12 @@ type PanelParent = {
   title: string;
 };
 
+type ThemeColor = "gray" | "blue" | "green" | "amber" | "coral";
+
 type Subtopic = {
   id: string;
   title: string;
-  color?: string;
+  color?: ThemeColor;
   summary?: string;
   groups?: Group[];
 };
@@ -36,12 +38,13 @@ type Stage = {
   id?: string;
   title: string;
   summary?: string;
+  color?: ThemeColor;
   intro?: IntroSection[];
   groups?: Group[];
   subtopics?: Subtopic[];
 };
 
-const drawerStages = roadmap.stages.flatMap((stage: Stage, index: number) => [
+const drawerStages = (roadmap.stages as Stage[]).flatMap((stage: Stage, index: number) => [
   {
     id: `intro-panel-${stage.id || index}`,
     title: stage.title,

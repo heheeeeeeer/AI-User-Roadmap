@@ -5,7 +5,6 @@ export const roadmap = {
       id: "intro",
       title: "前言",
       color: "gray",
-      side: "left",
       summary: "如果你想用好 AI，却不知道从哪里开始，可以参考这份 Roadmap。",
       intro: [
         {
@@ -38,8 +37,6 @@ export const roadmap = {
       id: "basic",
       title: "基础概念",
       color: "blue",
-      side: "left",
-      drawer: true,
       summary: "先了解最基础的概念：我们现在谈论的 AI 到底是什么，为什么它能回答问题，以及为什么它有时会说错。",
       groups: [
         {
@@ -68,8 +65,6 @@ export const roadmap = {
       id: "quick",
       title: "快速上手",
       color: "blue",
-      side: "right",
-      drawer: true,
       summary: "完成第一次真正有用的 AI 使用：打开任意一个工具，提出一个具体问题，得到一个可以继续加工的回答。",
       groups: [
         {
@@ -104,7 +99,6 @@ export const roadmap = {
       id: "core",
       title: "核心场景",
       color: "green",
-      side: "right",
       subtopics: [
         {
           id: "research",
@@ -352,9 +346,10 @@ export const roadmap = {
                 "这里主要讲原理和一些实操经验，具体工具的选择看自己哪个用着顺手即可。简单的图片一般直接在 GPT、Gemini 或豆包对话框中生成，复杂的视觉设计可以用 Lovart，OiiOii 这类画布型工具"
               ],
               toolResources: [
-                { label: "Lovart", url: "https://www.lovart.com/" },
+                { label: "Lovart", url: "https://www.lovart.ai/" },
+                { label: "OiiOii", url: "https://www.oiioii.ai/" },
                 { label: "可灵", url: "https://klingai.com/" },
-                { label: "即梦", url: "https://jimeng.doubao.com/" }
+                { label: "即梦", url: "https://jimeng.jianying.com/" }
               ],
               resources: [
                 {
@@ -378,17 +373,17 @@ export const roadmap = {
                   note: "AI 短片《卢浮宫小猫》的全流程分享，选角、定调、音乐、分镜、美术、动画，每一步都讲得很清楚。"
                 },
                 {
-                  label: "Mx-Shell / AI原创短片〈丧尸清道夫〉-重制版，国产“爱死机”！",
+                  label: "Mx-Shell / AI原创短片《丧尸清道夫》-重制版，国产“爱死机”！",
                   url: "https://www.bilibili.com/video/BV1FFRQB2Eqw/",
                   note: "《丧尸清道夫》正片。"
                 },
                 {
-                  label: "Mx-Shell / 今天把我关于〈丧尸清道夫〉的创作思路分享给大家，如果能帮到你，我会很开心。",
+                  label: "Mx-Shell / 今天把我关于《丧尸清道夫》的创作思路分享给大家，如果能帮到你，我会很开心。",
                   url: "https://www.bilibili.com/video/BV1xuVC6AEbg/",
                   note: "《丧尸清道夫》的生视频思路，非常真实接地气。不仅分享了“抽卡”过程，还展示了剪辑时间线和调色思路。"
                 },
                 {
-                  label: "Mx-Shell / 国产“爱死机”〈丧尸清道夫〉图片资产工作流的创作思路分享！",
+                  label: "Mx-Shell / 国产“爱死机”《丧尸清道夫》图片资产工作流的创作思路分享！",
                   url: "https://www.bilibili.com/video/BV1qJ7C6cEfS/",
                   note: "《丧尸清道夫》的生图工作流，同样非常真实，没有用故作玄虚的提示词，只是把想要的东西描述清楚，然后调整迭代。"
                 }
@@ -457,8 +452,6 @@ export const roadmap = {
       id: "advanced",
       title: "Agent",
       color: "coral",
-      side: "right",
-      summary: "让 AI 从单轮对话走向多步执行、工具调用和长期工作流。",
       groups: [
         {
           title: "什么是 Agent？",
@@ -492,7 +485,7 @@ export const roadmap = {
           resources: [
             {
               label: "Claude Code Docs / 探索 .claude 目录",
-              url: "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview#claudemd",
+              url: "https://code.claude.com/docs/zh-CN/claude-directory",
               note: "Claude Code 官方文档对于 .claude 目录的介绍，包括了 CLAUDE.md 等一系列配置文件，可以总览有哪些可以个性化的地方。"
             },
             {
