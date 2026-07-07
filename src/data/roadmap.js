@@ -347,6 +347,8 @@ export const roadmap = {
               ],
               toolResources: [
                 { label: "Lovart", url: "https://www.lovart.ai/" },
+                { label: "TapNow", url: "https://app.tapnow.ai/home" },
+                { label: "Liblib", url: "https://www.liblib.art/" },
                 { label: "OiiOii", url: "https://www.oiioii.ai/" },
                 { label: "可灵", url: "https://klingai.com/" },
                 { label: "即梦", url: "https://jimeng.jianying.com/" }

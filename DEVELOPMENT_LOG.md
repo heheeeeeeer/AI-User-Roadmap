@@ -2,6 +2,111 @@
 
 每次修改本项目后，都需要在这里追加记录。下一次修改前必须先阅读本文件，并确认上一条记录里的回归检查点没有复现。
 
+## 2026-07-07（优化详情面板打开动效与空白关闭）
+
+### 改动摘要
+
+- 根据录屏排查详情面板打开时文字出现偏移的问题，判断根因是面板宽度、左侧路线图宽度等参与排版的属性在过渡过程中造成文字重排。
+- 移除 `.roadmap-board` 和 `.detail-dock` 上的 width / flex-basis / margin-left 布局动画，改为布局尺寸瞬间落位，只保留详情面板的 opacity 与轻微 transform 视觉动画。
+- 将详情内容横向入场距离从 24px 降到 10px，减少文字“滑入感”。
+- 新增桌面端点击详情面板外空白区域关闭；面板内部点击、资源链接点击、返回按钮和阶段按钮点击不受影响，移动端继续沿用遮罩关闭逻辑。
+
+### 影响文件
+
+- `src/components/Roadmap.astro`
+- `src/styles/global.css`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+- `git diff --check` 检查通过。
+- 静态搜索确认不再存在 width / flex-basis / margin-left 这类布局属性的过渡动画。
+- 尝试使用本机 Chrome 做自动化点击验证时被系统权限拦截（EPERM），因此本轮未完成浏览器自动化点击检查。
+
+### 下一次改动前需要防止复现
+
+- 不要重新对详情面板宽度、左侧路线图宽度或 flex-basis 添加过渡，否则会再次导致文字在打开时重排/偏移。
+- 如果继续优化面板入场动画，优先使用 opacity、transform，不要使用 width、left、right、margin 等影响排版的属性。
+- 桌面端空白关闭依赖 `detail-dock` 外部点击判断，后续调整 DOM 层级时需要确认点击面板内部不会误关闭。
+
+## 2026-07-07（增加 Cloudflare Pages 安全头与缓存策略）
+
+### 改动摘要
+
+- 新增 `public/_headers`，为 Cloudflare Pages 部署产物增加统一浏览器安全响应头。
+- 加入 CSP、frame 防护、MIME sniffing 防护、Referrer Policy、HSTS、Permissions Policy、跨源隔离相关基础头，降低 XSS、点击劫持、资源滥用和不必要浏览器能力暴露的风险；其中 `script-src` 仅允许同源脚本，不允许内联脚本。
+- 为首页与 `roadmap-data.json` 设置 `must-revalidate`，避免内容更新后被长期缓存；为 Astro 哈希资源设置长期 immutable 缓存，为公开静态图片和图标设置一周缓存，提升宣发访问时的加载稳定性。
+- 将客户端资源外链校验收紧为仅允许 `https:` URL，避免未来误加入明文 HTTP 或非 Web 协议链接。
+- 在 `roadmap-data.json` 生成入口增加构建期数据校验，阻止空标题、非法 ID、非法主题色、重复 ID 和非 HTTPS 资源链接进入部署产物。
+
+### 影响文件
+
+- `public/_headers`
+- `src/components/Roadmap.astro`
+- `src/pages/roadmap-data.json.ts`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm audit` 检查通过，包含开发依赖在内显示 0 vulnerabilities。
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+- 检查 `dist/_headers`，确认 Cloudflare Pages 需要的 `_headers` 文件已被 Astro 从 `public/` 正确复制到构建产物。
+- 检查 `src/data/roadmap.js` 中 86 个资源 URL，确认全部为合法 `https:` URL。
+- 检查构建产物 `dist/index.html`，确认生产页面没有内联脚本，CSP 可使用更严格的 `script-src 'self'`。
+- `git diff --check` 检查通过。
+
+### 下一次改动前需要防止复现
+
+- 如果后续引入外部字体、统计脚本、第三方图片或 iframe，需要同步更新 CSP，否则线上会被安全策略拦截。
+- 当前 CSP 为兼容 Astro 内联样式和标题字符级 CSS 变量，保留了 `style-src 'unsafe-inline'`；若后续改为 nonce/hash 方案，需要一并验证动效和客户端详情面板。
+- 如果 Cloudflare Pages 未通过 GitHub 集成自动部署，仍需要在 Cloudflare 控制台或 GitHub Actions 中配置部署链路；本次仓库内加固只确保部署产物具备安全头和缓存策略。
+
+## 2026-07-07（为详情面板增加 Gradual Blur 边缘）
+
+### 改动摘要
+
+- 在详情面板 `.intro-popover` 的顶部和底部增加轻量 Gradual Blur 边缘效果。
+- 使用 CSS 伪元素、`backdrop-filter` 和渐变 mask 实现，不新增 DOM，不引入动画库。
+- 伪元素设置 `pointer-events: none`，避免影响详情面板里的点击、滚动、关闭和返回交互。
+
+### 影响文件
+
+- `src/styles/global.css`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+
+### 下一次改动前需要防止复现
+
+- 详情面板右上角关闭按钮需要继续保持在柔化层之上，避免被伪元素遮挡。
+- 如果后续调整详情面板内边距，需要同步检查上下 Gradual Blur 是否盖住正文标题或底部资源卡片。
+
+## 2026-07-07（为主标题增加 Blur Text 动效）
+
+### 改动摘要
+
+- 将首页主标题 `AI User Roadmap` 拆成字符级渲染，并保留完整 `aria-label`，确保视觉动效不破坏标题语义。
+- 使用 CSS 自实现类似 React Bits `Blur Text` 的加载动效：字符从轻微模糊、下移和透明状态逐步进入清晰状态。
+- 增加 `prefers-reduced-motion: reduce` 兼容，用户关闭系统动效时直接显示静态标题。
+
+### 影响文件
+
+- `src/components/Roadmap.astro`
+- `src/styles/global.css`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+
+### 下一次改动前需要防止复现
+
+- 不要为了标题动效引入额外动画库，当前效果应继续保持轻量 CSS 实现。
+- 后续调整标题排版时，需要确认字符级 span 不造成移动端标题横向溢出。
+
 ## 2026-07-06（修复最后一张浮岛底部渐隐）
 
 ### 改动摘要
