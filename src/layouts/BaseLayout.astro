@@ -1,5 +1,11 @@
 ---
-const { title = "AI User Roadmap", description = "AI User Roadmap" } = Astro.props;
+const {
+  title = "AI User Roadmap",
+  description = "一份从入门到进阶的 AI 学习路径，帮助普通用户更清晰地开始使用 AI。",
+  canonical = "https://ai.heheer.com/",
+  image = "https://ai.heheer.com/assets/readme-preview.png",
+  robots,
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -8,13 +14,25 @@ const { title = "AI User Roadmap", description = "AI User Roadmap" } = Astro.pro
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    {robots && <meta name="robots" content={robots} />}
     <meta name="theme-color" content="#f8f7f5" />
+    <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/assets/islands/roadmap/island-01.webp" as="image" type="image/webp" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta property="og:site_name" content="AI User Roadmap" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
     <title>{title}</title>
   </head>
   <body>

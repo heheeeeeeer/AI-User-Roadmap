@@ -2,6 +2,41 @@
 
 每次修改本项目后，都需要在这里追加记录。下一次修改前必须先阅读本文件，并确认上一条记录里的回归检查点没有复现。
 
+## 2026-07-08（补强线上宣发 SEO 与爬虫文件）
+
+### 改动摘要
+
+- 根据线上站点体检结果，为基础布局增加 canonical、Open Graph 和 Twitter Card 元信息，提升微信、飞书、社交平台等场景的链接预览质量。
+- 将首页 description 从通用项目名改成更清晰的中文介绍。
+- 新增 `robots.txt` 和 `sitemap.xml`，让搜索引擎能正确识别站点入口和 sitemap。
+- 新增 `404.astro` 静态错误页，并为 404 页面设置 `noindex, follow`，避免错误页被搜索引擎收录。
+- 为 `404.html`、`robots.txt` 和 `sitemap.xml` 增加 Cloudflare Pages 缓存头。
+
+### 影响文件
+
+- `src/layouts/BaseLayout.astro`
+- `src/pages/index.astro`
+- `src/pages/404.astro`
+- `src/styles/global.css`
+- `public/robots.txt`
+- `public/sitemap.xml`
+- `public/_headers`
+- `DEVELOPMENT_LOG.md`
+
+### 已做验证
+
+- `npm run build` 构建通过，Astro check 为 0 errors、0 warnings、0 hints。
+- `git diff --check` 检查通过。
+- 检查 `dist/index.html`，确认首页已输出 canonical、中文 description、OG image 和 Twitter Card。
+- 检查 `dist/404.html`，确认 404 页面已输出 `meta name="robots" content="noindex, follow"`。
+- 检查 `dist/robots.txt` 和 `dist/sitemap.xml`，确认两者已被复制进构建产物。
+
+### 下一次改动前需要防止复现
+
+- 后续如更换域名、增加 www 域或迁移部署地址，需要同步更新 canonical、OG URL、sitemap 和 robots 中的绝对地址。
+- 如果替换 README 预览图或新增专用分享图，需要同步检查 `og:image` / `twitter:image` 是否仍存在且体积适合社交平台抓取。
+- 不要在 SEO 调整中改动路线图主布局、详情面板定位或浮岛 mask，避免复现之前的横向溢出、面板位移和最后一张岛底部发虚问题。
+
 ## 2026-07-07（优化详情面板打开动效与空白关闭）
 
 ### 改动摘要
