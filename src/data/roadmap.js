@@ -370,11 +370,6 @@ export const roadmap = {
                   note: "虽然实测 GPT-Image-2 没有视频中提到的某些问题，但里面从模型原理角度思考提示词的思路很有趣，值得学习。"
                 },
                 {
-                  label: "数字生命卡兹克 / 火爆全网的《卢浮宫小猫》AI视频万字创作心得分享",
-                  url: "https://mp.weixin.qq.com/s?__biz=MzIyMzA5NjEyMA==&mid=2647678972&idx=1&sn=d42663a7ea0cf4881ce4c5f5fdcb7bb6",
-                  note: "AI 短片《卢浮宫小猫》的全流程分享，选角、定调、音乐、分镜、美术、动画，每一步都讲得很清楚。"
-                },
-                {
                   label: "Mx-Shell / AI原创短片《丧尸清道夫》-重制版，国产“爱死机”！",
                   url: "https://www.bilibili.com/video/BV1FFRQB2Eqw/",
                   note: "《丧尸清道夫》正片。"
