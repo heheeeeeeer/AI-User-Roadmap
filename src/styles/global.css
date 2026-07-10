@@ -1160,6 +1160,13 @@ a {
   .page-shell { padding: 10px 10px 24px; }
   .product-workspace { display: block; }
   .product-workspace.is-detail-open .roadmap-board { flex: none; width: 100%; }
+  .product-workspace.is-detail-open .detail-dock {
+    flex: none;
+    width: 0;
+    height: 0;
+    margin-left: 0;
+    transform: none;
+  }
   .roadmap-board { width: 100%; padding: 28px 22px 42px; }
   .roadmap-title { align-items: start; }
   .roadmap-title h1 { font-size: 38px; }
@@ -1178,6 +1185,8 @@ a {
     box-shadow: none;
     opacity: 1;
     visibility: visible;
+    transform: none;
+    transition: none;
   }
   .intro-popover {
     position: fixed;
