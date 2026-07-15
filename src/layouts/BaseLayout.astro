@@ -5,6 +5,7 @@ const {
   canonical = "https://ai.heheer.com/",
   image = "https://ai.heheer.com/assets/readme-preview.png",
   robots,
+  preloadHero = false,
 } = Astro.props;
 ---
 
@@ -22,7 +23,7 @@ const {
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="preload" href="/assets/islands/roadmap/island-01.webp" as="image" type="image/webp" />
+    {preloadHero && <link rel="preload" href="/assets/islands/roadmap/island-01.webp" as="image" type="image/webp" />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

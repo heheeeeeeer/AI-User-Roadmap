@@ -55,6 +55,18 @@ const titleCharacters = Array.from(roadmap.title);
     tabindex="-1"
     data-intro-close-overlay
   ></button>
+
+  <div
+    class="panel-load-error"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    hidden
+    data-panel-load-error
+  >
+    <span data-panel-load-error-message>详情暂时加载失败，请检查网络后重试。</span>
+    <button type="button" data-panel-load-retry>重试</button>
+  </div>
 </main>
 
 <script>
@@ -102,17 +114,95 @@ const titleCharacters = Array.from(roadmap.title);
 
   type PanelMap = Record<string, PanelData>;
 
+  type RoadmapHistoryState = {
+    panelId: string | null;
+    depth: number;
+    stackId: string;
+  };
+
   const setupStagePanels = () => {
     const PANEL_DATA_URL = "/roadmap-data.json";
+    const HISTORY_STATE_KEY = "__aiRoadmap";
     const mobileQuery = window.matchMedia("(max-width: 900px)");
     const overlay = document.querySelector<HTMLButtonElement>("[data-intro-close-overlay]");
     const workspace = document.querySelector<HTMLElement>(".product-workspace");
+    const roadmapBoard = document.querySelector<HTMLElement>(".roadmap-board");
     const detailDock = document.querySelector<HTMLElement>(".detail-dock");
+    const loadError = document.querySelector<HTMLElement>("[data-panel-load-error]");
+    const loadErrorMessage = document.querySelector<HTMLElement>("[data-panel-load-error-message]");
+    const retryButton = document.querySelector<HTMLButtonElement>("[data-panel-load-retry]");
     let lockedScrollY = 0;
     let panelDataPromise: Promise<PanelMap> | null = null;
+    let focusRestoreTrigger: HTMLButtonElement | null = null;
+    let pendingRetry: {
+      panelId: string;
+      trigger: HTMLButtonElement | null;
+      syncHistory: boolean;
+    } | null = null;
+    let historyUnwindPending = false;
+    let historyUnwindTimer = 0;
+    let panelOpenRequestId = 0;
 
     const getPanels = () => Array.from(document.querySelectorAll<HTMLElement>("[data-intro-panel]"));
     const getTriggers = () => Array.from(document.querySelectorAll<HTMLButtonElement>("[data-intro-trigger]"));
+    const getOpenPanel = () => getPanels().find((panel) => panel.dataset.open === "true") ?? null;
+
+    const getRoadmapHistoryState = (state: unknown = window.history.state): RoadmapHistoryState | null => {
+      if (!state || typeof state !== "object") return null;
+      const candidate = (state as Record<string, unknown>)[HISTORY_STATE_KEY];
+      if (!candidate || typeof candidate !== "object") return null;
+
+      const { panelId, depth, stackId } = candidate as Partial<RoadmapHistoryState>;
+      if ((panelId !== null && typeof panelId !== "string") || !Number.isInteger(depth) || (depth ?? -1) < 0) {
+        return null;
+      }
+      if (typeof stackId !== "string" || !stackId) return null;
+
+      return { panelId: panelId ?? null, depth: depth as number, stackId };
+    };
+
+    const createHistoryStackId = () =>
+      window.crypto.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
+    const mergeRoadmapHistoryState = (roadmapState: RoadmapHistoryState) => {
+      const currentState = window.history.state;
+      const preservedState =
+        currentState && typeof currentState === "object" && !Array.isArray(currentState)
+          ? (currentState as Record<string, unknown>)
+          : {};
+      return { ...preservedState, [HISTORY_STATE_KEY]: roadmapState };
+    };
+
+    const replaceRoadmapHistoryState = (roadmapState: RoadmapHistoryState) => {
+      window.history.replaceState(mergeRoadmapHistoryState(roadmapState), "");
+    };
+
+    const pushRoadmapHistoryState = (roadmapState: RoadmapHistoryState) => {
+      window.history.pushState(mergeRoadmapHistoryState(roadmapState), "");
+    };
+
+    const setTriggerLoading = (trigger: HTMLButtonElement | null | undefined, isLoading: boolean) => {
+      if (!trigger?.hasAttribute("data-intro-trigger")) return;
+      trigger.toggleAttribute("data-loading", isLoading);
+      if (isLoading) {
+        trigger.setAttribute("aria-busy", "true");
+      } else {
+        trigger.removeAttribute("aria-busy");
+      }
+    };
+
+    const clearLoadError = () => {
+      pendingRetry = null;
+      if (loadError) loadError.hidden = true;
+    };
+
+    const showLoadError = (panelId: string, trigger: HTMLButtonElement | null, syncHistory: boolean) => {
+      pendingRetry = { panelId, trigger, syncHistory };
+      if (loadErrorMessage) {
+        loadErrorMessage.textContent = "详情暂时加载失败，请检查网络后重试。";
+      }
+      if (loadError) loadError.hidden = false;
+    };
 
     const getSafeExternalUrl = (value: string) => {
       try {
@@ -299,6 +389,8 @@ const titleCharacters = Array.from(roadmap.title);
       panel.dataset.open = "false";
       if (panelData.parent) panel.dataset.parentPanelId = panelData.parent.id;
       panel.setAttribute("aria-hidden", "true");
+      panel.setAttribute("role", "region");
+      panel.inert = true;
 
       const closeButton = createElement("button", "intro-popover-close") as HTMLButtonElement;
       closeButton.type = "button";
@@ -322,7 +414,15 @@ const titleCharacters = Array.from(roadmap.title);
 
       if (panelData.title || panelData.summary) {
         const overview = createElement("section", "intro-section intro-overview");
-        if (panelData.title) overview.append(createElement("h2", undefined, panelData.title));
+        if (panelData.title) {
+          const title = createElement("h2", undefined, panelData.title);
+          title.id = `${panelData.id}-title`;
+          title.tabIndex = -1;
+          panel.setAttribute("aria-labelledby", title.id);
+          overview.append(title);
+        } else {
+          panel.setAttribute("aria-label", "阶段详情");
+        }
         if (panelData.summary) overview.append(createElement("p", "intro-lead", panelData.summary));
         body.append(overview);
       }
@@ -352,13 +452,18 @@ const titleCharacters = Array.from(roadmap.title);
 
     const loadPanelData = async () => {
       if (!panelDataPromise) {
-        panelDataPromise = fetch(PANEL_DATA_URL, { credentials: "same-origin" }).then(async (response) => {
-          if (!response.ok) {
-            throw new Error(`Failed to load panel data: ${response.status}`);
-          }
+        panelDataPromise = fetch(PANEL_DATA_URL, { credentials: "same-origin" })
+          .then(async (response) => {
+            if (!response.ok) {
+              throw new Error(`Failed to load panel data: ${response.status}`);
+            }
 
-          return response.json() as Promise<PanelMap>;
-        });
+            return response.json() as Promise<PanelMap>;
+          })
+          .catch((error) => {
+            panelDataPromise = null;
+            throw error;
+          });
       }
 
       return panelDataPromise;
@@ -398,62 +503,183 @@ const titleCharacters = Array.from(roadmap.title);
       document.documentElement.style.overflow = "hidden";
     };
 
-    const closeAll = (restoreFocus = false) => {
+    const configurePanelMode = (panel: HTMLElement, isMobile: boolean) => {
+      panel.setAttribute("role", isMobile ? "dialog" : "region");
+      if (isMobile) {
+        panel.setAttribute("aria-modal", "true");
+      } else {
+        panel.removeAttribute("aria-modal");
+      }
+    };
+
+    const getFocusableElements = (panel: HTMLElement) =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((element) => !element.inert && element.getClientRects().length > 0);
+
+    const closeAll = (restoreFocus = false, suppressFocusRestore = false) => {
       const triggers = getTriggers();
       const panels = getPanels();
-      const activeTrigger = triggers.find((trigger) => trigger.getAttribute("aria-expanded") === "true");
+      const activeElement = document.activeElement as HTMLElement | null;
+      const focusWasInsidePanel = panels.some((panel) => activeElement && panel.contains(activeElement));
+      const focusTarget = focusRestoreTrigger;
 
       panels.forEach((panel) => {
         panel.dataset.open = "false";
         panel.classList.remove("is-open");
         panel.setAttribute("aria-hidden", "true");
+        panel.removeAttribute("aria-modal");
+        panel.setAttribute("role", "region");
+        panel.inert = true;
       });
       triggers.forEach((trigger) => trigger.setAttribute("aria-expanded", "false"));
       document.querySelectorAll(".island-stage.is-active").forEach((stage) => stage.classList.remove("is-active"));
       document.body.dataset.introDrawerOpen = "false";
+      if (roadmapBoard) roadmapBoard.inert = false;
       workspace?.classList.remove("is-detail-open");
       overlay?.setAttribute("aria-hidden", "true");
       if (overlay) overlay.tabIndex = -1;
       unlockPage();
-      if (restoreFocus) activeTrigger?.focus({ preventScroll: true });
+      if (!suppressFocusRestore && (restoreFocus || focusWasInsidePanel)) {
+        focusTarget?.focus({ preventScroll: true });
+      }
+      focusRestoreTrigger = null;
     };
 
-    const hasOpenPanel = () => getPanels().some((panel) => panel.dataset.open === "true");
+    const hasOpenPanel = () => Boolean(getOpenPanel());
 
-    const openPanelById = async (panelId: string, activeTrigger?: HTMLButtonElement | null) => {
-      activeTrigger?.setAttribute("data-loading", "true");
-      const panel = await ensurePanel(panelId);
-      activeTrigger?.removeAttribute("data-loading");
-      if (!panel) return;
+    const syncRoadmapHistoryAfterOpen = (
+      panelId: string,
+      sourceWasInsidePanel: boolean,
+      hadOpenPanel: boolean
+    ) => {
+      if (!mobileQuery.matches) return;
 
-      closeAll(false);
-      panel.dataset.open = "true";
-      panel.classList.add("is-open");
-      panel.setAttribute("aria-hidden", "false");
+      const currentState = getRoadmapHistoryState();
+      if (!hadOpenPanel || !currentState || currentState.depth === 0) {
+        const stackId = currentState?.depth === 0 ? currentState.stackId : createHistoryStackId();
+        if (!currentState || currentState.depth !== 0) {
+          replaceRoadmapHistoryState({ panelId: null, depth: 0, stackId });
+        }
+        pushRoadmapHistoryState({ panelId, depth: 1, stackId });
+        return;
+      }
 
-      const stagePanelId = panel.dataset.parentPanelId || panelId;
-      const stageTrigger = getTriggers().find((candidate) => candidate.getAttribute("aria-controls") === stagePanelId);
-      stageTrigger?.setAttribute("aria-expanded", "true");
-      stageTrigger?.closest(".island-stage")?.classList.add("is-active");
-      activeTrigger?.setAttribute("aria-expanded", "true");
+      const nextState = {
+        panelId,
+        depth: sourceWasInsidePanel ? currentState.depth + 1 : currentState.depth,
+        stackId: currentState.stackId,
+      };
+      if (sourceWasInsidePanel) {
+        pushRoadmapHistoryState(nextState);
+      } else {
+        replaceRoadmapHistoryState(nextState);
+      }
+    };
 
-      workspace?.classList.add("is-detail-open");
-      panel.querySelector<HTMLElement>(".intro-popover-body")?.scrollTo({ top: 0 });
+    const clearHistoryUnwind = () => {
+      historyUnwindPending = false;
+      if (historyUnwindTimer) window.clearTimeout(historyUnwindTimer);
+      historyUnwindTimer = 0;
+    };
 
-      if (mobileQuery.matches) {
-        document.body.dataset.introDrawerOpen = "true";
-        overlay?.setAttribute("aria-hidden", "false");
-        if (overlay) overlay.tabIndex = 0;
-        lockPage();
+    const unwindRoadmapHistory = (restoreFocus = true) => {
+      const currentState = getRoadmapHistoryState();
+      panelOpenRequestId += 1;
+      closeAll(restoreFocus);
+      if (!currentState || currentState.depth === 0) return;
+
+      historyUnwindPending = true;
+      window.history.go(-currentState.depth);
+      historyUnwindTimer = window.setTimeout(() => {
+        if (!historyUnwindPending) return;
+        const staleState = getRoadmapHistoryState();
+        if (staleState?.stackId === currentState.stackId && staleState.depth > 0) {
+          replaceRoadmapHistoryState({ panelId: null, depth: 0, stackId: currentState.stackId });
+        }
+        clearHistoryUnwind();
+      }, 700);
+    };
+
+    const openPanelById = async (
+      panelId: string,
+      activeTrigger?: HTMLButtonElement | null,
+      syncHistory = true
+    ) => {
+      const requestId = ++panelOpenRequestId;
+      setTriggerLoading(activeTrigger, true);
+
+      try {
+        const panel = await ensurePanel(panelId);
+        if (requestId !== panelOpenRequestId) return false;
+        if (!panel) throw new Error(`Panel not found: ${panelId}`);
+
+        clearLoadError();
+        const sourceWasInsidePanel = Boolean(activeTrigger?.closest("[data-intro-panel]"));
+        const hadOpenPanel = hasOpenPanel();
+        closeAll(false, true);
+        panel.dataset.open = "true";
+        panel.classList.add("is-open");
+        panel.setAttribute("aria-hidden", "false");
+        panel.inert = false;
+        configurePanelMode(panel, mobileQuery.matches);
+
+        const stagePanelId = panel.dataset.parentPanelId || panelId;
+        const stageTrigger = getTriggers().find((candidate) => candidate.getAttribute("aria-controls") === stagePanelId);
+        focusRestoreTrigger = stageTrigger ?? null;
+        stageTrigger?.setAttribute("aria-expanded", "true");
+        stageTrigger?.closest(".island-stage")?.classList.add("is-active");
+        if (activeTrigger?.hasAttribute("data-intro-trigger")) {
+          activeTrigger.setAttribute("aria-expanded", "true");
+        }
+
+        workspace?.classList.add("is-detail-open");
+        panel.querySelector<HTMLElement>(".intro-popover-body")?.scrollTo({ top: 0 });
+
+        if (mobileQuery.matches) {
+          document.body.dataset.introDrawerOpen = "true";
+          if (roadmapBoard) roadmapBoard.inert = true;
+          overlay?.setAttribute("aria-hidden", "false");
+          if (overlay) overlay.tabIndex = 0;
+          lockPage();
+        }
+
+        if (syncHistory) {
+          syncRoadmapHistoryAfterOpen(panelId, sourceWasInsidePanel, hadOpenPanel);
+        }
+
+        if (mobileQuery.matches || sourceWasInsidePanel) {
+          requestAnimationFrame(() => {
+            const focusTarget =
+              panel.querySelector<HTMLElement>("[data-intro-back]") ??
+              panel.querySelector<HTMLElement>("[data-intro-close]");
+            focusTarget?.focus({ preventScroll: true });
+          });
+        }
+        return true;
+      } catch {
+        if (requestId === panelOpenRequestId) {
+          showLoadError(
+            panelId,
+            activeTrigger?.hasAttribute("data-intro-trigger") ? activeTrigger : null,
+            syncHistory
+          );
+        }
+        return false;
+      } finally {
+        setTriggerLoading(activeTrigger, false);
       }
     };
 
     const openPanel = async (trigger: HTMLButtonElement) => {
+      if (trigger.hasAttribute("data-loading")) return;
       const panelId = trigger.getAttribute("aria-controls");
       const alreadyOpen = trigger.getAttribute("aria-expanded") === "true";
 
       if (alreadyOpen) {
-        closeAll(false);
+        unwindRoadmapHistory(false);
         return;
       }
 
@@ -467,7 +693,12 @@ const titleCharacters = Array.from(roadmap.title);
       const backButton = target?.closest<HTMLButtonElement>("[data-intro-back]");
       if (backButton) {
         const panelId = backButton.getAttribute("aria-controls");
-        if (panelId) void openPanelById(panelId, null);
+        const historyState = getRoadmapHistoryState();
+        if (mobileQuery.matches && historyState && historyState.depth > 1) {
+          window.history.back();
+        } else if (panelId) {
+          void openPanelById(panelId, backButton, !mobileQuery.matches);
+        }
         return;
       }
 
@@ -478,31 +709,82 @@ const titleCharacters = Array.from(roadmap.title);
       }
 
       if (target?.closest("[data-intro-close]")) {
-        closeAll(true);
+        unwindRoadmapHistory(true);
         return;
       }
 
       if (!mobileQuery.matches && hasOpenPanel() && !target?.closest(".detail-dock")) {
-        closeAll(false);
+        unwindRoadmapHistory(false);
       }
     });
 
-    overlay?.addEventListener("click", () => closeAll(true));
+    overlay?.addEventListener("click", () => unwindRoadmapHistory(true));
+    retryButton?.addEventListener("click", () => {
+      if (!pendingRetry) return;
+      const { panelId, trigger, syncHistory } = pendingRetry;
+      void openPanelById(panelId, trigger, syncHistory);
+    });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && hasOpenPanel()) closeAll(true);
+      if (event.key === "Escape" && hasOpenPanel()) {
+        unwindRoadmapHistory(true);
+        return;
+      }
+
+      if (event.key !== "Tab" || !mobileQuery.matches) return;
+      const activePanel = getOpenPanel();
+      if (!activePanel) return;
+      const focusableElements = getFocusableElements(activePanel);
+      if (!focusableElements.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && (activeElement === firstElement || !activePanel.contains(activeElement))) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
     });
 
-    const syncViewport = () => {
+    window.addEventListener("popstate", (event) => {
+      const historyState = getRoadmapHistoryState(event.state);
+
+      if (historyUnwindPending) {
+        clearHistoryUnwind();
+        closeAll(false);
+        return;
+      }
+
+      if (historyState?.panelId && historyState.depth > 0) {
+        void openPanelById(historyState.panelId, null, false);
+        return;
+      }
+
+      panelOpenRequestId += 1;
+      closeAll(true);
+    });
+
+    const syncViewport = (event?: MediaQueryListEvent) => {
       const panels = getPanels();
       const triggers = getTriggers();
 
       if (mobileQuery.matches) {
-        closeAll(false);
+        if (event) {
+          unwindRoadmapHistory(false);
+        } else {
+          panelOpenRequestId += 1;
+          closeAll(false);
+        }
         return;
       }
       unlockPage();
       const activePanel = panels.find((panel) => panel.dataset.open === "true");
       if (activePanel) {
+        activePanel.inert = false;
+        configurePanelMode(activePanel, false);
         const activeTrigger = triggers.find((trigger) => trigger.getAttribute("aria-controls") === activePanel.id);
         activeTrigger?.setAttribute("aria-expanded", "true");
         activeTrigger?.closest(".island-stage")?.classList.add("is-active");
@@ -516,15 +798,27 @@ const titleCharacters = Array.from(roadmap.title);
     const requestIdle = window.requestIdleCallback?.bind(window);
     if (requestIdle) {
       requestIdle(() => {
-        void loadPanelData();
+        void loadPanelData().catch(() => undefined);
       }, { timeout: 1500 });
     } else {
       setTimeout(() => {
-        void loadPanelData();
+        void loadPanelData().catch(() => undefined);
       }, 600);
     }
 
     syncViewport();
+
+    const navigationEntry = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    const initialHistoryState = getRoadmapHistoryState();
+    if (navigationEntry?.type === "reload" && initialHistoryState && initialHistoryState.depth > 0) {
+      window.setTimeout(() => unwindRoadmapHistory(false), 0);
+    } else if (initialHistoryState?.panelId && initialHistoryState.depth > 0) {
+      window.setTimeout(() => {
+        void openPanelById(initialHistoryState.panelId as string, null, false);
+      }, 0);
+    }
   };
 
   if (document.readyState === "loading") {

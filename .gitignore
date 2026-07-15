@@ -1,11 +1,29 @@
+# Operating system and editor files
 .DS_Store
 *.swp
 *.swo
+.idea/
+.vscode/
+
+# Dependencies and generated output
 node_modules/
 dist/
 .astro/
+coverage/
 
+# Local environment and Cloudflare state
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+.wrangler/
+*.log
+
+# Local development workflow and review artifacts
+AGENTS.md
+DEVELOPMENT_LOG.md
+TEST_REPORT_*.md
+FIX_VERIFICATION_*.md
 docs/AI Roadmap 0.0.2.md
 docs/AI Roadmap 第一版技术文档.md
-DEVELOPMENT_LOG.md
-
