@@ -4,9 +4,17 @@ const {
   description = "一份从入门到进阶的 AI 学习路径，帮助普通用户更清晰地开始使用 AI。",
   canonical = "https://ai.heheer.com/",
   image = "https://ai.heheer.com/assets/readme-preview.png",
+  imageAlt = "AI User Roadmap 学习路线图预览",
+  imageWidth = 2940,
+  imageHeight = 1618,
   robots,
   preloadHero = false,
+  structuredData,
 } = Astro.props;
+
+const serializedStructuredData = structuredData
+  ? JSON.stringify(structuredData).replace(/</g, "\\u003c")
+  : null;
 ---
 
 <!doctype html>
@@ -29,11 +37,19 @@ const {
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={image} />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta property="og:image:width" content={String(imageWidth)} />
+    <meta property="og:image:height" content={String(imageHeight)} />
+    <meta property="og:locale" content="zh_CN" />
     <meta property="og:site_name" content="AI User Roadmap" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={image} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+    {serializedStructuredData && (
+      <script type="application/ld+json" is:inline set:html={serializedStructuredData}></script>
+    )}
     <title>{title}</title>
   </head>
   <body>

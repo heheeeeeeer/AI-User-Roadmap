@@ -4,6 +4,12 @@
 
 <h1 align="center">AI User Roadmap</h1>
 
+<p align="center">一份面向普通用户、从入门到进阶的免费 AI 学习路线图。</p>
+
+<p align="center">
+  <a href="https://ai.heheer.com/"><strong>在线访问 AI User Roadmap →</strong></a>
+</p>
+
 <p align="center">
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-5f8a55?style=flat-square" /></a>
   <img alt="Built with Astro" src="https://img.shields.io/badge/built%20with-Astro-1f2a24?style=flat-square" />
@@ -11,12 +17,14 @@
 </p>
 
 <p align="center">
-  <img src="./public/assets/readme-preview.png" alt="AI User Roadmap Preview" />
+  <a href="https://ai.heheer.com/">
+    <img src="./public/assets/readme-preview.png" alt="AI User Roadmap 学习路线图预览" />
+  </a>
 </p>
 
 ## 💡 关于这个项目
 
-这个项目整理了一条从「不知道从哪里开始」到「能把 AI 用进真实任务」的学习路径。
+这个项目整理了一条从「不知道从哪里开始」到「能把 AI 用进真实任务」的 AI 学习路线图。
 
 它不追求覆盖所有前沿名词，也不把目标放在底层研究或 AI 应用开发上，而是希望帮普通使用者减少噪音、降低试错成本，找到一批真正值得上手的工具、文章、课程和实践方法。
 

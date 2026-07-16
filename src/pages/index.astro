@@ -4,9 +4,22 @@ import Roadmap from "../components/Roadmap.astro";
 import { roadmap } from "../data/roadmap.js";
 import "../styles/global.css";
 
-const pageDescription = "一份从入门到进阶的 AI 学习路径，帮助普通用户更清晰地开始使用 AI。";
+const pageDescription = "一份面向普通用户的免费 AI 学习路线图，覆盖基础概念、AI 工具、信息调研、内容理解、知识整理、写作、多媒体创作、AI 编程与 Agent。";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "AI User Roadmap",
+  alternateName: "AI 学习路线图",
+  url: "https://ai.heheer.com/",
+  inLanguage: "zh-CN",
+};
 ---
 
-<BaseLayout title={roadmap.title} description={pageDescription} preloadHero>
+<BaseLayout
+  title={roadmap.title}
+  description={pageDescription}
+  structuredData={structuredData}
+  preloadHero
+>
   <Roadmap roadmap={roadmap} />
 </BaseLayout>

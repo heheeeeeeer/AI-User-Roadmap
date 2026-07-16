@@ -35,6 +35,63 @@ const titleCharacters = Array.from(roadmap.title);
             ))}
           </h1>
         </div>
+
+        <nav class="roadmap-actions" aria-label="项目快捷操作">
+          <a
+            class="roadmap-action"
+            href="https://github.com/heheeeeeeer/AI-User-Roadmap"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="喜欢的话，点个 Star 吧～"
+          >
+            <svg class="roadmap-action-icon is-github" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 .9a11.1 11.1 0 0 0-3.5 21.6c.6.1.8-.3.8-.6v-2.2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.3 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.7.2 2.9.1 3.2.8.9 1.2 1.9 1.2 3.2 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.1v3.2c0 .3.2.7.8.6A11.1 11.1 0 0 0 12 .9Z" />
+            </svg>
+            <span class="roadmap-action-tooltip" role="tooltip">喜欢的话，点个 Star 吧～</span>
+          </a>
+
+          <!-- <a
+            class="roadmap-action"
+            href="/changelog/"
+            aria-label="更新日志"
+          >
+            <svg class="roadmap-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5.5 3.5h8.2l3.8 3.8v4.2M5.5 3.5v17h7M13.5 3.8v4h3.8M8.5 11h5M8.5 14.5h3" />
+              <circle cx="17" cy="17" r="4" />
+              <path d="M17 14.8V17l1.5 1" />
+            </svg>
+            <span class="roadmap-action-tooltip" role="tooltip">更新日志</span>
+          </a>
+
+          <button
+            class="roadmap-action"
+            type="button"
+            aria-label="配套视频"
+            aria-disabled="true"
+          >
+            <svg class="roadmap-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3.5" y="5" width="17" height="14" rx="3" />
+              <path class="is-filled" d="m10.2 9 5.5 3-5.5 3V9Z" />
+            </svg>
+            <span class="roadmap-action-tooltip" role="tooltip">配套视频</span>
+          </button> -->
+
+          <button
+            class="roadmap-action"
+            type="button"
+            aria-label="分享一下"
+            data-share-page
+          >
+            <svg class="roadmap-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="18" cy="5" r="2.5" />
+              <circle cx="6" cy="12" r="2.5" />
+              <circle cx="18" cy="19" r="2.5" />
+              <path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5" />
+            </svg>
+            <span class="roadmap-action-tooltip" role="tooltip" data-share-tooltip>分享一下</span>
+          </button>
+          <span class="sr-only" aria-live="polite" data-share-status></span>
+        </nav>
       </div>
 
       <div class="roadmap-flow">
@@ -42,6 +99,11 @@ const titleCharacters = Array.from(roadmap.title);
           <IslandStage stage={stage} index={index} isLast={index === roadmap.stages.length - 1} />
         ))}
       </div>
+
+      <footer class="roadmap-signature">
+        Made with <span aria-hidden="true">♥</span> by
+        <a href="https://heheer.com/" target="_blank" rel="noopener noreferrer">heheer</a>
+      </footer>
     </section>
 
     <aside class="detail-dock" aria-label="阶段详情"></aside>
@@ -821,9 +883,66 @@ const titleCharacters = Array.from(roadmap.title);
     }
   };
 
+  const setupShareButton = () => {
+    const shareButton = document.querySelector<HTMLButtonElement>("[data-share-page]");
+    const shareTooltip = document.querySelector<HTMLElement>("[data-share-tooltip]");
+    const shareStatus = document.querySelector<HTMLElement>("[data-share-status]");
+    if (!shareButton || !shareTooltip || !shareStatus) return;
+
+    let feedbackTimer = 0;
+    const showFeedback = (message: string) => {
+      shareTooltip.textContent = message;
+      shareStatus.textContent = message;
+      shareButton.dataset.copied = "true";
+      if (feedbackTimer) window.clearTimeout(feedbackTimer);
+      feedbackTimer = window.setTimeout(() => {
+        shareTooltip.textContent = "分享一下";
+        shareStatus.textContent = "";
+        delete shareButton.dataset.copied;
+      }, 1800);
+    };
+
+    const copyWithLegacySelection = () => {
+      const input = document.createElement("textarea");
+      input.value = window.location.href;
+      input.setAttribute("readonly", "");
+      input.style.position = "fixed";
+      input.style.opacity = "0";
+      document.body.append(input);
+      input.select();
+      const legacyDocument = document as unknown as { execCommand: (command: string) => boolean };
+      const copied = legacyDocument.execCommand("copy");
+      input.remove();
+      return copied;
+    };
+
+    const copyCurrentUrl = async () => {
+      try {
+        const clipboardWrite = navigator.clipboard?.writeText(window.location.href);
+        if (!clipboardWrite) throw new Error("Clipboard API unavailable");
+        await Promise.race([
+          clipboardWrite,
+          new Promise<never>((_, reject) => {
+            window.setTimeout(() => reject(new Error("Clipboard write timed out")), 900);
+          }),
+        ]);
+        showFeedback("网址复制好啦！");
+      } catch {
+        const copied = copyWithLegacySelection();
+        showFeedback(copied ? "网址复制好啦！" : "复制失败，请重试");
+      }
+    };
+
+    shareButton.addEventListener("click", () => void copyCurrentUrl());
+  };
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setupStagePanels, { once: true });
+    document.addEventListener("DOMContentLoaded", () => {
+      setupStagePanels();
+      setupShareButton();
+    }, { once: true });
   } else {
     setupStagePanels();
+    setupShareButton();
   }
 </script>

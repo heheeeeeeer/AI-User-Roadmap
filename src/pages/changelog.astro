@@ -1,0 +1,233 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import "../styles/global.css";
+
+const pageTitle = "更新日志 | AI User Roadmap";
+const pageDescription = "AI User Roadmap 的版本记录。";
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical="https://ai.heheer.com/changelog/"
+  robots="noindex, follow"
+>
+  <main class="changelog-page">
+    <header class="changelog-header">
+      <div class="changelog-heading">
+        <h1>更新日志</h1>
+      </div>
+
+      <a class="changelog-home" href="/" aria-label="返回 AI User Roadmap">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m3.5 10.5 8.5-7 8.5 7" />
+          <path d="M5.5 9.5v10h5v-6h3v6h5v-10" />
+        </svg>
+      </a>
+    </header>
+
+    <section class="changelog-timeline" aria-label="版本记录">
+      <article class="changelog-entry">
+        <span class="changelog-node" aria-hidden="true"></span>
+
+        <div class="changelog-content">
+          <time datetime="2026-07-16">2026.07.17</time>
+          <p>AI User Roadmap 正式上线啦！</p>
+        </div>
+      </article>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .changelog-page {
+    width: min(clamp(720px, 59vw, 980px), calc(100% - 96px));
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 36px 0 80px;
+  }
+
+  .changelog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 28px;
+  }
+
+  .changelog-heading h1 {
+    margin: 0;
+    font-family: "Songti SC", "STSong", "Noto Serif SC", Georgia, serif;
+    font-size: clamp(40px, 3.4vw, 52px);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: #1d3029;
+  }
+
+  .changelog-home {
+    display: grid;
+    flex: 0 0 44px;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-top: 0;
+    border: 1px solid rgb(118 123 112 / 13%);
+    border-radius: 13px;
+    background: rgb(255 253 249 / 58%);
+    box-shadow: 0 5px 18px rgb(58 61 52 / 4%);
+    color: #687c65;
+    transition:
+      color 180ms ease,
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .changelog-home:hover,
+  .changelog-home:focus-visible {
+    color: #4f704d;
+    border-color: rgb(103 137 88 / 26%);
+    background: rgb(255 254 251 / 92%);
+    box-shadow: 0 10px 26px rgb(51 65 45 / 8%);
+    transform: translateY(-1px);
+  }
+
+  .changelog-home:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+
+  .changelog-home svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .changelog-timeline {
+    position: relative;
+    width: 100%;
+    min-height: 220px;
+    margin-top: clamp(96px, 9vw, 150px);
+    padding: 0 0 24px 72px;
+  }
+
+  .changelog-timeline::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    bottom: 0;
+    left: 10px;
+    width: 1px;
+    background: linear-gradient(180deg, rgb(122 154 108 / 34%), rgb(122 154 108 / 5%));
+  }
+
+  .changelog-entry {
+    position: relative;
+  }
+
+  .changelog-entry + .changelog-entry {
+    margin-top: 34px;
+  }
+
+  .changelog-node {
+    position: absolute;
+    top: 3px;
+    left: -68px;
+    width: 13px;
+    height: 13px;
+    border: 3px solid #eff2e9;
+    border-radius: 50%;
+    background: #86a66f;
+    box-shadow: 0 0 0 3px rgb(244 245 239 / 74%);
+  }
+
+  .changelog-content {
+    padding: 0 0 26px;
+    border: 0;
+  }
+
+  .changelog-content time {
+    display: block;
+    color: #73935f;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: 0.09em;
+  }
+
+  .changelog-content p {
+    color: #4f5c52;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.65;
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 640px) {
+    .changelog-page {
+      width: min(100% - 32px, 540px);
+      padding: 24px 0 54px;
+    }
+
+    .changelog-heading h1 {
+      font-size: 30px;
+    }
+
+    .changelog-home {
+      flex-basis: 34px;
+      width: 34px;
+      height: 34px;
+      margin-top: 0;
+      border-radius: 10px;
+    }
+
+    .changelog-home svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .changelog-timeline {
+      width: 100%;
+      min-height: 160px;
+      margin-top: 70px;
+      padding: 0 0 22px 42px;
+    }
+
+    .changelog-timeline::before {
+      top: 6px;
+      left: 6px;
+    }
+
+    .changelog-node {
+      top: 2px;
+      left: -41px;
+      width: 10px;
+      height: 10px;
+      border-width: 2px;
+    }
+
+    .changelog-content {
+      padding: 0 2px 22px;
+    }
+
+    .changelog-content time {
+      font-size: 12px;
+    }
+
+    .changelog-content p {
+      margin-top: 20px;
+      font-size: 15px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .changelog-home {
+      transition: none;
+    }
+  }
+</style>
