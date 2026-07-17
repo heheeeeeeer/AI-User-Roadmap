@@ -11,7 +11,7 @@ export const roadmap = {
           title: "为什么整理这份 Roadmap",
           paragraphs: [
             "做了几期 AI 科普后，我收到最多的反馈是：大家都知道 AI 很有用，也被铺天盖地的 AI 宣传包围着，但真正用起来，好像也就是有事问问豆包，效果还不一定好。想再学深一点，又不知道该从哪里开始。",
-            "于是我回顾了下自己学习和使用 AI 的过程，发现也踩了不少的坑，比如我曾经买过一个 99 元的 AI 课程，结果两个小时几乎都是车轱辘话，还不如后来刷到的同主题免费视频；又比如有一段时间用过某个 Claude Code 中转服务，后来被扒出来实际接入的是便宜的国产模型；再比如花了半个小时认真读一篇文章，照着测试后发现效果和文中描述完全不一样，然后才意识到那是一篇虚假的公关稿...... AI 的快速发展除了提升互联网行业的生产力，但与此同时，也让很多传统行业里的技术小白突然被推到浪潮面前，不知道该怎么开始。",
+            "于是我回顾了下自己学习和使用 AI 的过程，发现也踩了不少的坑，比如我曾经买过一个 99 元的 AI 课程，结果两个小时几乎都是车轱辘话，还不如后来刷到的同主题免费视频；又比如有一段时间用过某个 Claude Code 中转服务，后来被扒出来实际调用会掺入便宜的模型；再比如花了半个小时认真读一篇文章，照着测试后发现效果和文中描述完全不一样，然后才意识到那是一篇虚假的公关稿...... AI 的快速发展除了提升互联网行业的生产力，但与此同时，也让很多传统行业里的技术小白突然被推到浪潮面前，不知道该怎么开始。",
             "所以这份 Roadmap 想做的事很简单：尽可能减少噪音和摩擦，给出一条真实、清晰、低门槛、易上手的学习路径，让每个愿意学习的人都能更顺利地开始使用 AI。"
           ]
         },
@@ -20,7 +20,7 @@ export const roadmap = {
           paragraphs: [
             "由于我也不是什么 AI 专家，只是一个扎实踩过坑，才把 AI 深度融入日常的普通使用者，我只能提供从一个小白到熟练使用 AI 的路径，至于更深入的 AI 应用开发或底层研究，就不在这份 Roadmap 的主要范围里了。",
             "如果你时间比较充裕，或者正处在职业、学习方向的转型期，可以慢慢探索这份 Roadmap 的每一个角落，里面的资源都经过认真筛选，很多也是我反复看过或实践过的，我相信多多少少会给你带来一些启发。",
-            "如果你已经有具体的工作问题要解决，也可以直接跳到对应的 AI 能力模块，从中找到适合自己的能力和工具，直接拿来用，或者参考其中的思路，很多场景都会有帮助。"
+            "如果你已经有具体的工作问题要解决，也可以直接跳到对应的 AI 核心场景模块，从中找到适合自己的能力和工具，直接拿来用，或者参考其中的思路，很多场景都会有帮助。"
           ]
         },
         {
@@ -126,7 +126,7 @@ export const roadmap = {
                   note: "虽然过去了很久，产品已经更新了好几轮了，但是许多结论比如 ChatGPT 更倾向于参考自己站点的信息 这种都还是适用的，可以参考。"
                 },
                 {
-                  label: "Weizhena / Agent Deep Research Skills",
+                  label: "Weizhena / Deep Research Skills",
                   url: "https://github.com/Weizhena/Deep-Research-skills",
                   note: "也很推荐用 Deep Research Skill 辅助调研。可以结合后面的 Agent 部分来看，这是其中一个测试了效果还可以的 skill，它践行了 human in the loop，让人能在列提纲、查细节、汇总等环节保持控制。"
                 }
@@ -134,14 +134,10 @@ export const roadmap = {
             },
             {
               title: "联网搜索",
-              description: "联网搜索是目前 AI 产品标配的功能，适合快速查找资料、补充事实和做基础核验。以下简单列举几个常用的 AI 搜索引擎。",
+              description: "联网搜索是目前 AI 产品标配的功能，适合快速查找资料、补充事实和做基础核验。以下是两个比较常用的 AI 搜索引擎。",
               toolResources: [
                 { label: "Perplexity", url: "https://www.perplexity.ai/" },
                 { label: "秘塔 AI 搜索", url: "https://metaso.cn/" },
-                { label: "Felo", url: "https://felo.ai/" },
-                { label: "Elicit", url: "https://elicit.com/" },
-                { label: "SciSpace", url: "https://scispace.com/" },
-                { label: "Consensus", url: "https://consensus.app/" }
               ]
             }
           ]
@@ -167,23 +163,15 @@ export const roadmap = {
               title: "网页",
               description: "最简单的是直接把链接发给 AI，让它阅读网页；更进一步可以尝试 AI 浏览器，用来浏览公开网页会很有帮助。",
               toolResources: [
-                { label: "Atlas", url: "https://chatgpt.com/zh-Hant-HK/atlas/" },
                 { label: "豆包浏览器", url: "https://www.doubao.com/" },
                 { label: "夸克浏览器", url: "https://www.quark.cn/" },
                 { label: "Dia", url: "https://www.diabrowser.com/" },
-                { label: "Comet", url: "https://www.perplexity.ai/comet" },
-                { label: "Tabbit", url: "https://www.tabbitbrowser.com/" }
               ],
               resources: [
                 {
                   label: "檀东东Tango / 重新学习怎么上网！AI·搜索·浏览器",
                   url: "https://www.bilibili.com/video/BV1vmcdeGEVw/",
                   note: "豆包电脑版自带的 AI 浏览器功能，几个场景挺实用，省去了不少装浏览器插件的功夫。"
-                },
-                {
-                  label: "秋芝2046 / OpenAI原生AI浏览器！值得拥有的N个理由～",
-                  url: "https://www.bilibili.com/video/BV12is1zQELH/",
-                  note: "总结了 AI 浏览器的使用场景：解决跳转到其他 AI 工具使用的问题，用于处理日常浏览器里的无数小需求。"
                 }
               ]
             },
@@ -410,7 +398,7 @@ export const roadmap = {
           groups: [
             {
               title: "推荐工具",
-              description: "AI coding 的工具更是多的不行，下面随便列一些个人用过体验还不错的。",
+              description: "AI coding 的工具非常多，下面列举一些个人用过体验还不错的。",
               toolResources: [
                 { label: "Cursor", url: "https://cursor.com/get-started" },
                 { label: "Codex", url: "https://openai.com/zh-Hans-CN/codex/" },
@@ -427,7 +415,7 @@ export const roadmap = {
                 {
                   label: "roadmap.sh / Vibe Coding",
                   url: "https://roadmap.sh/vibe-coding",
-                  note: "这份 Roadmap 的灵感来源之一。这个 Vibe Coding 路线图涵盖工具选择、技术栈、安全、版本控制、测试等方面，看完后应该就能成为一个 Vibe Coding 高手。"
+                  note: "这份 Roadmap 的灵感来源之一。这个 Vibe Coding 路线图涵盖工具选择、技术栈、安全、版本控制、测试等方面，看完后就能成为一个 Vibe Coding 高手。"
                 },
                 {
                   label: "李自然说 / Vibe Coding实战复盘：做玩具容易，做产品难",
